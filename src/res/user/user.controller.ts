@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -9,5 +9,9 @@ export class UserController {
     const res = await this.userService.getUserMainPage();
 
     return res;
+  }
+  @Get()
+  async findAll() {
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
 }
