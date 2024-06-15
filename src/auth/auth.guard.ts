@@ -1,9 +1,17 @@
 // src/auth/auth.guard.ts
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  constructor(private readonly authService: AuthService) {}
+
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -12,18 +20,23 @@ export class AuthGuard implements CanActivate {
   }
 
   validateRequest(request: any): boolean {
-    // 여기에서 인증 로직을 구현합니다.
-    // 예를 들어, JWT 토큰을 검증하는 코드가 들어갈 수 있습니다.
-    const token = request.headers.authorization;
-    if (token && this.verifyToken(token)) {
-      return true;
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      throw new UnauthorizedException('Authorization header is missing');
     }
-    return false;
-  }
 
-  verifyToken(token: string): boolean {
-    // JWT 토큰 검증 로직을 작성합니다.
-    // 예시: 단순히 토큰이 'valid-token'인지 확인하는 로직
-    return token === 'valid-token';
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      throw new UnauthorizedException('Token is missing');
+    }
+
+    const validatedToken = this.authService.validateToken(token);
+    if (!validatedToken) {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    // 검증된 토큰 데이터를 요청 객체에 추가할 수 있습니다.
+    request.user = validatedToken;
+    return true;
   }
 }
