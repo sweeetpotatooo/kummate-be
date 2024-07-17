@@ -1,16 +1,22 @@
-// src/auth/auth.service.ts
-import { Injectable } from '@nestjs/common';
-import * as jwt from 'jsonwebtoken';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { UserService } from '../res/user/user.service';
+import { LoginDto } from '../res/login/dto/login.dto';
+import { JwtPayload } from './jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
-  private readonly JWT_SECRET = 'your_jwt_secret_key'; // JWT 비밀 키를 환경 변수로 설정하는 것이 좋습니다.
+  constructor(
+    private readonly usersService: UserService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-  validateToken(token: string): any {
-    try {
-      return jwt.verify(token, this.JWT_SECRET);
-    } catch (error) {
-      return null;
+  async login(loginDto: LoginDto): Promise<string> {
+    const user = await this.usersService.validateUser(loginDto);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
     }
+    const payload: JwtPayload = { username: user.username, sub: user.id };
+    return this.jwtService.sign(payload);
   }
 }

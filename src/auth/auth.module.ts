@@ -1,9 +1,21 @@
-// src/auth/auth.module.ts
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthGuard } from './auth.guard';
+import { AuthController } from './auth.controller';
+import { UserModule } from '../res/user/user.module';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './jwt.strategy';
+
 @Module({
-  providers: [AuthService, AuthGuard],
-  exports: [AuthService],
+  imports: [
+    UserModule,
+    PassportModule,
+    JwtModule.register({
+      secret: 'your_secret_key', // 여기서 비밀 키를 설정하세요
+      signOptions: { expiresIn: '60m' },
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}
