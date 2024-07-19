@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../res/user/user.service';
+import { UserService } from '../res/user/user.service'; // 경로 수정
 import { LoginDto } from '../res/login/dto/login.dto';
 import { JwtPayload } from './jwt-payload.interface';
 
@@ -16,7 +16,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    const payload: JwtPayload = { username: user.username, sub: user.id };
+    const payload: JwtPayload = { username: user.nickname, sub: user.user_id };
     return this.jwtService.sign(payload);
   }
 }
