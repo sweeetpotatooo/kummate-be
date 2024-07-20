@@ -19,7 +19,7 @@ export class AuthGuard implements CanActivate {
     return this.validateRequest(request);
   }
 
-  validateRequest(request: any): boolean {
+  async validateRequest(request: any): Promise<boolean> {
     const authHeader = request.headers.authorization;
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
@@ -30,12 +30,12 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Token is missing');
     }
 
-    const validatedToken = this.authService.validateToken(token);
+    const validatedToken = await this.authService.validateToken(token);
     if (!validatedToken) {
       throw new UnauthorizedException('Invalid token');
     }
 
-    // 검증된 토큰 데이터를 요청 객체에 추가할 수 있습니다.
+    // 검증된 토큰 데이터를 요청 객체에 추가합니다.
     request.user = validatedToken;
     return true;
   }
