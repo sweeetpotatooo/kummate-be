@@ -26,8 +26,8 @@ export class UserService {
     return 'User Main Page';
   }
 
-  async findUserById(id: number): Promise<User | null> {
-    const user = await this.usersRepository.findOne({ where: { id } });
+  async findUserById(user_id: number): Promise<User | null> {
+    const user = await this.usersRepository.findOne({ where: { user_id } });
     if (!user) {
       return null;
     }
