@@ -15,7 +15,7 @@ export class UserService {
     const { username, password } = loginDto;
     const user = await this.usersRepository.findOne({ where: { username } });
 
-    // 여기서는 간단히 비밀번호를 비교하지만, 실제로는 해시 비밀번호를 사용해야 합니다.
+    // Here, we compare the plain text password for simplicity, but in a real application, you should use hashed passwords.
     if (user && user.password === password) {
       return user;
     }
