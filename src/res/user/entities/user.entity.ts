@@ -1,7 +1,7 @@
 // src/res/user/user.entity.ts
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Post } from '../../post/entities/post.entity';
-
+import { Login } from '../../login/entities/login.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -66,4 +66,7 @@ export class User {
 
   @OneToMany(() => Post, (post) => post.user)
   posts: Post[];
+
+  @OneToMany(() => Login, (login) => login.user)
+  logins: Login[];
 }
