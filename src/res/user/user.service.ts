@@ -21,7 +21,12 @@ export class UserService {
     }
     return null;
   }
-
+  async findOne(user_id: number): Promise<User | null> {
+    const user = await this.usersRepository.findOne({
+      where: { user_id },
+    });
+    return user || null;
+  }
   async getUserMainPage(): Promise<string> {
     return 'User Main Page';
   }

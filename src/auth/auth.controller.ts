@@ -9,6 +9,7 @@ export class AuthController {
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
     const token = await this.authService.login(loginDto);
+    console.log(token);
     if (!token) {
       throw new UnauthorizedException('Invalid credentials');
     }

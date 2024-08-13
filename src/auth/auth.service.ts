@@ -1,35 +1,31 @@
-// src/auth/auth.service.ts
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../res/user/user.service'; // 경로 수정
+import { UserService } from '../res/user/user.service';
 import { LoginDto } from '../res/login/dto/login.dto';
-import { JwtPayload } from './jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UserService,
+    private readonly userService: UserService,
     private readonly jwtService: JwtService,
   ) {}
 
   async login(loginDto: LoginDto): Promise<string> {
-    const user = await this.usersService.validateUser(loginDto);
+    const user = await this.userService.validateUser(loginDto);
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    const payload: JwtPayload = { username: user.nickname, sub: user.user_id };
+
+    // JWT 토큰을 생성하여 반환합니다.
+    const payload = { username: user.email, sub: user.nickname };
     return this.jwtService.sign(payload);
   }
 
-  async validateToken(token: string): Promise<JwtPayload> {
+  async validateToken(token: string): Promise<any> {
     try {
-      const payload = this.jwtService.verify<JwtPayload>(token);
-      const user = await this.usersService.findUserById(payload.sub);
-      if (!user) {
-        throw new UnauthorizedException('User not found');
-      }
-      return payload;
-    } catch (error) {
+      return this.jwtService.verify(token);
+    } catch (e) {
       throw new UnauthorizedException('Invalid token');
     }
   }

@@ -9,7 +9,7 @@ import { Post } from './entities/post.entity';
 export class PostService {
   constructor(
     @InjectRepository(Post)
-    private readonly postRepository: Repository<Post>,
+    private readonly postRepository: Repository<Post>, // TypeORM의 기본 Repository 사용
   ) {}
 
   async create(createPostDto: CreatePostDto): Promise<Post> {
