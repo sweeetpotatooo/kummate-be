@@ -8,8 +8,9 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
+    console.log(`controller_logindto: ${JSON.stringify(loginDto)}`);
     const token = await this.authService.login(loginDto);
-    console.log(token);
+    console.log(`ttoken: ${token}`);
     if (!token) {
       throw new UnauthorizedException('Invalid credentials');
     }

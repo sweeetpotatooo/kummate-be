@@ -18,10 +18,8 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
 
   // AuthService 주입 받기
-  const authService = app.get(AuthService);
 
   // AuthService 인스턴스를 AuthGuard에 전달
-  app.useGlobalGuards(new AuthGuard(authService));
 
   await app.listen(3001);
 
