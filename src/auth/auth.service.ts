@@ -15,7 +15,7 @@ export class AuthService {
     const user = await this.userService.validateUser(loginDto);
     console.log(`user: ${user}`);
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('잘못된 자격증명');
     }
 
     // JWT 토큰을 생성하여 반환합니다.
@@ -27,7 +27,7 @@ export class AuthService {
     try {
       return this.jwtService.verify(token);
     } catch (e) {
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException('잘못된 토큰');
     }
   }
 }
