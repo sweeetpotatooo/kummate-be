@@ -12,10 +12,10 @@ export class UserService {
   ) {}
 
   async validateUser(loginDto: LoginDto): Promise<User | null> {
-    const { user_id, password } = loginDto;
-    console.log(user_id);
-    const user = await this.usersRepository.findOne({ where: { user_id } });
-    console.log(user);
+    const { email, password } = loginDto;
+    console.log('Login DTO:', loginDto); // loginDto 전체 로그
+    const user = await this.usersRepository.findOne({ where: { email } });
+    console.log('User:', user); // 쿼리 결과 로그
     // Here, we compare the plain text password for simplicity, but in a real application, you should use hashed passwords.
     if (user && user.password === password) {
       return user;
