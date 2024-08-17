@@ -13,5 +13,4 @@ export const typeOrmModuleOptions: TypeOrmModuleOptions = {
   database: 'kumprac',
   entities: [User, Post, Login], // 엔티티를 여기 추가
   synchronize: true, // 개발 환경에서만 true로 설정
-  logging: true,
 };

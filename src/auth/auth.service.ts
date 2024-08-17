@@ -13,7 +13,7 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<string> {
     console.log(`loginDto:${loginDto.user_id}`);
     const user = await this.userService.validateUser(loginDto);
-    console.log(`user: ${user}`);
+    console.log(`User_service: ${user}`);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
