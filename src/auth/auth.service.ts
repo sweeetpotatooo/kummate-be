@@ -11,10 +11,13 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto): Promise<string> {
-    console.log(`loginDto:${loginDto.user_id}`);
+    console.log(`Login DTO: ${JSON.stringify(loginDto)}`);
+    //console.log(`loginDto: ${loginDto.email}`);
     const user = await this.userService.validateUser(loginDto);
-    console.log(`User_service: ${user}`);
+    console.log(`User after validateUser: ${JSON.stringify(user)}`);
+    //console.log(`User_service: ${user}`);
     if (!user) {
+      console.log('User not found or password mismatch');
       throw new UnauthorizedException('Invalid credentials');
     }
 

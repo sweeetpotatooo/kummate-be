@@ -10,7 +10,8 @@ export const typeOrmModuleOptions: TypeOrmModuleOptions = {
   port: 3306,
   username: 'root',
   password: 'tpgus8028~',
-  database: 'kumprac',
+  database: 'kummate',
   entities: [User, Post, Login], // 엔티티를 여기 추가
   synchronize: true, // 개발 환경에서만 true로 설정
+  //logging: true,
 };

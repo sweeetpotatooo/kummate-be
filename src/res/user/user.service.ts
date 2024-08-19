@@ -10,16 +10,25 @@ export class UserService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
-
   async validateUser(loginDto: LoginDto): Promise<User | null> {
     const { email, password } = loginDto;
-    console.log('Login DTO:', loginDto); // loginDto 전체 로그
+
+    // 사용자 이메일로 데이터베이스에서 사용자 찾기
     const user = await this.usersRepository.findOne({ where: { email } });
-    console.log('User:', user); // 쿼리 결과 로그
-    // Here, we compare the plain text password for simplicity, but in a real application, you should use hashed passwords.
-    if (user && user.password === password) {
-      return user;
+    console.log('User found:', user); // 쿼리 결과 로그
+
+    // 사용자가 존재하고, 비밀번호가 일치하는지 확인
+    if (user) {
+      if (user.password === password) {
+        console.log('Password match successful');
+        return user;
+      } else {
+        console.log('Password does not match');
+      }
+    } else {
+      console.log('User not found');
     }
+
     return null;
   }
   async findOne(user_id: number): Promise<User | null> {

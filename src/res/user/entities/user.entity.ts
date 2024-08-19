@@ -1,68 +1,75 @@
-// src/res/user/user.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Post } from '../../post/entities/post.entity';
 import { Login } from '../../login/entities/login.entity';
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  user_id: number;
+  user_id: number; // 자동으로 1씩 증가하는 primary key
 
-  @Column()
-  username: string;
+  @Column({ nullable: false })
+  username: string; // NOT NULL
 
-  @Column()
-  email: string;
+  @Column({ nullable: false, unique: true })
+  email: string; // NOT NULL 및 UNIQUE
 
-  @Column()
-  password: string;
+  @Column({ nullable: false })
+  password: string; // NOT NULL
 
-  @Column()
-  nickname: string;
+  @Column({ nullable: false })
+  nickname: string; // NOT NULL
 
-  @Column()
-  user_roles: number;
+  @Column({ nullable: false })
+  department: string; // NOT NULL
 
-  @Column()
-  student_id: string;
+  @Column({ nullable: false })
+  age: number; // NOT NULL
 
-  @Column()
-  department: string;
+  @Column({ nullable: true })
+  user_roles: number | null; // NULL 허용
 
-  @Column()
-  certified: number;
+  @Column({ nullable: true })
+  student_id: string | null; // NULL 허용
 
-  @Column()
-  user_type: string;
+  @Column({ nullable: true })
+  certified: number | null; // NULL 허용
 
-  @Column()
-  age: number;
+  @Column({ nullable: true })
+  user_type: string | null; // NULL 허용
 
-  @Column()
-  image: string;
+  @Column({ nullable: true })
+  image: string | null; // NULL 허용
 
-  @Column()
-  match_status: number;
+  @Column({ nullable: true })
+  match_status: number | null; // NULL 허용
 
-  @Column()
-  modified_date_time: Date;
+  @UpdateDateColumn({ type: 'timestamp' })
+  modified_date_time: Date; // 수정 시 자동 업데이트
 
-  @Column()
-  created_date_time: Date;
+  @CreateDateColumn({ type: 'timestamp' })
+  created_date_time: Date; // 생성 시 자동 설정
 
-  @Column()
-  smoke: number;
+  @Column({ nullable: true })
+  smoke: number | null; // NULL 허용
 
-  @Column()
-  mbti: string;
+  @Column({ nullable: true })
+  mbti: string | null; // NULL 허용
 
-  @Column()
-  snoring: number;
+  @Column({ nullable: true })
+  snoring: number | null; // NULL 허용
 
-  @Column()
-  bruxism: number;
+  @Column({ nullable: true })
+  bruxism: number | null; // NULL 허용
 
-  @Column()
-  datail: string;
+  @Column({ nullable: true })
+  datail: string | null; // NULL 허용
 
   @OneToMany(() => Post, (post) => post.user)
   posts: Post[];
