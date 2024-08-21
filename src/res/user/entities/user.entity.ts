@@ -1,3 +1,4 @@
+// src/res/user/entities/user.entity.ts
 import {
   Entity,
   Column,
@@ -24,22 +25,19 @@ export class User {
   password: string; // NOT NULL
 
   @Column({ nullable: false })
-  nickname: string; // NOT NULL
-
-  @Column({ nullable: false })
   department: string; // NOT NULL
 
   @Column({ nullable: false })
   age: number; // NOT NULL
 
-  @Column({ nullable: true })
-  user_roles: number | null; // NULL 허용
+  @Column({ type: 'int', nullable: true })
+  user_roles: number | null; // NULL 허용, 정수형
 
-  @Column({ nullable: true })
-  student_id: string | null; // NULL 허용
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  student_id: string | null; // NULL 허용, 학생 ID
 
-  @Column({ nullable: true })
-  certified: number | null; // NULL 허용
+  @Column({ type: 'boolean', default: false })
+  certified: boolean; // NULL 허용, 인증 여부
 
   @Column({ nullable: true })
   user_type: string | null; // NULL 허용
@@ -47,8 +45,8 @@ export class User {
   @Column({ nullable: true })
   image: string | null; // NULL 허용
 
-  @Column({ nullable: true })
-  match_status: number | null; // NULL 허용
+  @Column({ type: 'int', nullable: true })
+  match_status: number | null; // NULL 허용, 정수형
 
   @UpdateDateColumn({ type: 'timestamp' })
   modified_date_time: Date; // 수정 시 자동 업데이트
@@ -56,20 +54,20 @@ export class User {
   @CreateDateColumn({ type: 'timestamp' })
   created_date_time: Date; // 생성 시 자동 설정
 
-  @Column({ nullable: true })
-  smoke: number | null; // NULL 허용
+  @Column({ type: 'boolean', nullable: true })
+  smoke: boolean | null; // NULL 허용, 흡연 여부
 
-  @Column({ nullable: true })
-  mbti: string | null; // NULL 허용
+  @Column({ type: 'varchar', length: 4, nullable: true })
+  mbti: string | null; // NULL 허용, MBTI (최대 4글자)
 
-  @Column({ nullable: true })
-  snoring: number | null; // NULL 허용
+  @Column({ type: 'int', nullable: true })
+  snoring: number | null; // NULL 허용, 코골이 정도 (정수형)
 
-  @Column({ nullable: true })
-  bruxism: number | null; // NULL 허용
+  @Column({ type: 'int', nullable: true })
+  bruxism: number | null; // NULL 허용, 이갈이 정도 (정수형)
 
-  @Column({ nullable: true })
-  datail: string | null; // NULL 허용
+  @Column({ type: 'text', nullable: true })
+  detail: string | null; // NULL 허용, 텍스트로 상세 정보
 
   @OneToMany(() => Post, (post) => post.user)
   posts: Post[];

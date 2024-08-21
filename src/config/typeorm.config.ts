@@ -1,4 +1,3 @@
-// src/config/typeorm.config.ts
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { User } from '../res/user/entities/user.entity';
 import { Post } from '../res/post/entities/post.entity';
@@ -6,12 +5,13 @@ import { Login } from 'src/res/login/entities/login.entity';
 
 export const typeOrmModuleOptions: TypeOrmModuleOptions = {
   type: 'mysql',
-  host: 'localhost',
-  port: 3306,
-  username: 'root',
-  password: 'tpgus8028~',
-  database: 'kummate',
-  entities: [User, Post, Login], // 엔티티를 여기 추가
-  synchronize: true, // 개발 환경에서만 true로 설정
-  //logging: true,
+  host: 'localhost', // 데이터베이스 호스트
+  port: 3306, // 데이터베이스 포트
+  username: 'root', // 데이터베이스 사용자 이름
+  password: 'tpgus8028~', // 데이터베이스 비밀번호
+  database: 'kummate', // 데이터베이스 이름
+  entities: [User, Post, Login],
+  synchronize: false, // 프로덕션에서는 false로 설정
 };
+
+export default typeOrmModuleOptions;

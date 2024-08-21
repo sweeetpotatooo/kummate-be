@@ -1,5 +1,13 @@
-import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Body,
+  Post,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { UserService } from './user.service';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -13,5 +21,9 @@ export class UserController {
   @Get()
   async findAll() {
     throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+  }
+  @Post()
+  async postJoin(@Body() createUserDto: CreateUserDto) {
+    return await this.userService.createUser(createUserDto);
   }
 }

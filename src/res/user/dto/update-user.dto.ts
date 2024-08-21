@@ -1,5 +1,4 @@
 // src/res/user/dto/update-user.dto.ts
-
 import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
 
 export class UpdateUserDto {
