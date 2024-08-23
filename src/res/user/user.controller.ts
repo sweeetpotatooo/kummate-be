@@ -3,11 +3,14 @@ import {
   Post,
   Controller,
   Get,
+  Put, // PUT 메서드 추가
+  Param,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto'; // UpdateUserDto 가져오기
 
 @Controller('user')
 export class UserController {
@@ -30,5 +33,14 @@ export class UserController {
   @Post('signup')
   async postJoin(@Body() createUserDto: CreateUserDto) {
     return await this.userService.createUser(createUserDto);
+  }
+
+  // 사용자 정보 업데이트 엔드포인트 추가
+  @Put(':id')
+  async updateUser(
+    @Param('id') id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return await this.userService.updateUser(id, updateUserDto);
   }
 }

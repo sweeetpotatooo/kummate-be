@@ -10,12 +10,4 @@ export class UpdateUserDto {
   @IsString()
   @Length(6, 20)
   password?: string;
-
-  @IsOptional()
-  @IsString()
-  firstName?: string;
-
-  @IsOptional()
-  @IsString()
-  lastName?: string;
 }
