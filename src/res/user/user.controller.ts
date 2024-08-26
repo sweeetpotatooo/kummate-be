@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Put,
+  Delete, // Delete 메서드 추가
   Param,
   HttpException,
   HttpStatus,
@@ -65,5 +66,12 @@ export class UserController {
   async checkVerificationStatus(@Body('email') email: string) {
     const verified = await this.userService.checkEmailVerified(email);
     return { verified };
+  }
+
+  // 사용자 삭제 엔드포인트 추가
+  @Delete(':id')
+  async deleteUser(@Param('id') id: number) {
+    await this.userService.deleteUser(id);
+    return { message: 'User deleted successfully' };
   }
 }
