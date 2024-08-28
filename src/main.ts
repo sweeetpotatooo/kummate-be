@@ -3,11 +3,19 @@ import { AppModule } from './app.module';
 import { AuthGuard } from './auth/auth.guard';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AuthService } from './auth/auth.service';
+import { ValidationPipe } from '@nestjs/common';
 
 declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // CORS 설정
+  app.enableCors({
+    origin: 'http://localhost:5173', // 리액트 애플리케이션이 동작하는 주소
+    credentials: true,
+  });
+
   // Swagger 설정
   const config = new DocumentBuilder()
     .setTitle('API Documentation')
