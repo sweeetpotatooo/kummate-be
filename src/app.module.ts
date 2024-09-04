@@ -13,6 +13,7 @@ import { LoginModule } from './res/login/login.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env', // .env 파일에서 환경 변수 로드
     }),
     UserModule,
     PostModule,

@@ -93,24 +93,30 @@ export class UserService {
 
   // 사용자 업데이트
   async updateUser(
-    user_id: number,
-    updateUserDto: UpdateUserDto,
+    email: string,
+    updateUserDto: UpdateUserDto, // 업데이트할 데이터 객체
   ): Promise<User> {
-    console.log('Updating user with ID:', user_id);
-    const user = await this.usersRepository.findOneBy({ user_id });
+    console.log(`Updating user with email: ${email}`);
+
+    // 주어진 email로 유저 정보를 DB에서 조회
+    const user = await this.usersRepository.findOneBy({ email });
 
     if (!user) {
-      console.log('User not found for ID:', user_id);
-      throw new NotFoundException('User not found');
+      console.log(`User not found for email: ${email}`);
+      throw new NotFoundException(`User with email ${email} not found`);
     }
 
+    // 만약 updateUserDto에 password가 있으면 해싱 처리 후 저장
     if (updateUserDto.password) {
-      console.log('Updating password for user ID:', user_id);
+      console.log(`Updating password for user with email: ${email}`);
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
+    // 유저 객체에 업데이트할 데이터 병합
     Object.assign(user, updateUserDto);
     console.log('Updated user data:', user);
+
+    // DB에 변경된 유저 정보 저장
     return this.usersRepository.save(user);
   }
 
@@ -146,5 +152,12 @@ export class UserService {
     const user = await this.usersRepository.findOne({ where: { user_id } });
     console.log('User found by ID:', user);
     return user || null;
+  }
+  async getUserByEmail(email: string): Promise<User | null> {
+    const user = await this.usersRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 }

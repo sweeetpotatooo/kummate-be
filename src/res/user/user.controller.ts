@@ -32,12 +32,12 @@ export class UserController {
     return await this.userService.createUser(createUserDto);
   }
 
-  @Put(':id')
+  @Put(':email')
   async updateUser(
-    @Param('id') id: number,
+    @Param('email') email: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return await this.userService.updateUser(id, updateUserDto);
+    return await this.userService.updateUser(email, updateUserDto);
   }
 
   // 이메일 인증 요청 엔드포인트

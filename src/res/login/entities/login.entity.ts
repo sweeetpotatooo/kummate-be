@@ -26,4 +26,7 @@ export class Login {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @Column()
+  token: string;
 }

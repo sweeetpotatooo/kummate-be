@@ -1,9 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { AuthGuard } from './auth/auth.guard';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AuthService } from './auth/auth.service';
-import { ValidationPipe } from '@nestjs/common';
 
 declare const module: any;
 

@@ -45,6 +45,9 @@ export class User {
   @Column({ nullable: true })
   image: string | null; // NULL 허용
 
+  @Column({ nullable: true })
+  gender: string | null; // NULL 허용
+
   @Column({ type: 'int', nullable: true })
   match_status: number | null; // NULL 허용, 정수형
 
@@ -74,4 +77,17 @@ export class User {
 
   @OneToMany(() => Login, (login) => login.user)
   logins: Login[];
+
+  @Column({ nullable: true })
+  currentRefreshToken?: string;
+
+  // Refresh Token 만료 시간을 저장할 필드
+  @Column({ type: 'timestamp', nullable: true })
+  currentRefreshTokenExp?: Date;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
