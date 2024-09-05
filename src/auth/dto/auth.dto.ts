@@ -37,3 +37,50 @@ export class ResetPasswordDto {
   @MinLength(6)
   newPassword: string;
 }
+
+export class SignUpRequestDto {
+  email: string;
+  password: string;
+  nickname: string;
+}
+
+export class SignInRequestDto {
+  email: string;
+  password: string;
+}
+
+export class TokenDto {
+  atk: string;
+  rtk: string;
+}
+
+export class SignInResultDto {
+  token: TokenDto;
+}
+
+export class OAuth2SignInRequestDto {
+  code: string;
+  registrationId: string;
+}
+
+export class OAuth2ProfileDto {
+  email: string;
+  nickName: string;
+  imageUrl: string;
+
+  static fromKakao(data: any): OAuth2ProfileDto {
+    return {
+      email: data.kakao_account.email,
+      nickName: data.properties.nickname,
+      imageUrl: data.properties.profile_image,
+    };
+  }
+
+  static fromGoogle(data: any): OAuth2ProfileDto {
+    return {
+      email: data.email,
+      nickName: data.name,
+      imageUrl: data.picture,
+    };
+  }
+}

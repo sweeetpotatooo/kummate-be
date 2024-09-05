@@ -1,3 +1,4 @@
+/*
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './dto/auth.dto';
@@ -21,17 +22,17 @@ export class AuthService {
     // 유저 정보 인증 (이메일과 비밀번호 확인)
     const user = await this.validateUser(loginDto);
     // 액세스 토큰 생성
-    const accessToken = await this.createAccessToken(user);
+    const atk = await this.createAccessToken(user);
     // 리프레시 토큰 생성
-    const refreshToken = await this.createRefreshToken(user);
+    const rtk = await this.createRefreshToken(user);
 
     // 유저의 리프레시 토큰을 DB에 저장
-    await this.setUserCurrentRefreshToken(user.email, refreshToken);
+    await this.setUserCurrentRefreshToken(user.email, rtk);
 
     // 액세스 토큰, 리프레시 토큰, 만료 시간 반환
     return {
-      accessToken,
-      refreshToken,
+      atk,
+      rtk,
       expiresIn: parseInt(
         this.configService.get<string>('JWT_ACCESS_TOKEN_EXP'),
       ),
@@ -56,12 +57,12 @@ export class AuthService {
 
     // 유저 정보 조회 후 새로운 액세스 토큰 발급
     const user = await this.userService.getUserByEmail(email);
-    const accessToken = await this.createAccessToken(user);
+    const atk = await this.createAccessToken(user);
 
     // 새롭게 발급된 액세스 토큰과 리프레시 토큰 반환
     return {
-      accessToken,
-      refreshToken,
+      atk,
+      rtk: refreshToken,
       expiresIn: parseInt(
         this.configService.get<string>('JWT_ACCESS_TOKEN_EXP'),
       ),
@@ -96,7 +97,7 @@ export class AuthService {
     };
 
     // JWT 액세스 토큰 생성
-    const access_token = await this.jwtService.signAsync(payload, {
+    const atk = await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'), // 액세스 토큰 시크릿 키
       expiresIn: parseInt(
         this.configService.get<string>('JWT_ACCESS_TOKEN_EXP'), // 액세스 토큰 만료 시간 설정
@@ -104,7 +105,7 @@ export class AuthService {
     });
 
     // 생성된 액세스 토큰 반환
-    return access_token;
+    return atk;
   }
 
   // 리프레시 토큰 생성 로직
@@ -115,7 +116,7 @@ export class AuthService {
     };
 
     // JWT 리프레시 토큰 생성
-    const refreshToken = await this.jwtService.signAsync(payload, {
+    const rtk = await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'), // 리프레시 토큰 시크릿 키
       expiresIn: parseInt(
         this.configService.get<string>('JWT_REFRESH_TOKEN_EXP'), // 리프레시 토큰 만료 시간 설정
@@ -123,14 +124,11 @@ export class AuthService {
     });
 
     // 생성된 리프레시 토큰 반환
-    return refreshToken;
+    return rtk;
   }
 
   // DB에 저장된 리프레시 토큰과 현재 리프레시 토큰을 비교
-  async compareUserRefreshToken(
-    email: string,
-    refreshToken: string,
-  ): Promise<boolean> {
+  async compareUserRefreshToken(email: string, rtk: string): Promise<boolean> {
     // 유저 정보 조회
     const user = await this.userService.getUserByEmail(email);
 
@@ -138,7 +136,7 @@ export class AuthService {
     if (!user.currentRefreshToken) return false;
 
     // DB에 저장된 리프레시 토큰과 제공된 리프레시 토큰 비교
-    const result = await bcrypt.compare(refreshToken, user.currentRefreshToken);
+    const result = await bcrypt.compare(rtk, user.currentRefreshToken);
     if (!result) return false; // 불일치 시 false 반환
 
     return true; // 일치하면 true 반환
@@ -146,12 +144,9 @@ export class AuthService {
 
   // 유저의 현재 리프레시 토큰을 암호화하여 DB에 저장
 
-  async setUserCurrentRefreshToken(
-    email: string,
-    refreshToken: string,
-  ): Promise<void> {
+  async setUserCurrentRefreshToken(email: string, rtk: string): Promise<void> {
     // 리프레시 토큰 암호화
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const hashedRefreshToken = await bcrypt.hash(rtk, 10);
 
     // 현재 날짜와 토큰 만료 시간 계산
     const now = new Date();
@@ -165,5 +160,103 @@ export class AuthService {
       currentRefreshToken: hashedRefreshToken, // 암호화된 리프레시 토큰 저장
       currentRefreshTokenExp: refreshTokenExp, // 토큰 만료 시간 저장
     });
+  }
+}
+*/
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../res/user/entities/user.entity';
+import { RefreshToken } from '../res/refresh-token/entities/RefreshToken.entity';
+import {
+  SignUpRequestDto,
+  SignInRequestDto,
+  SignInResultDto,
+} from './dto/auth.dto';
+import * as bcrypt from 'bcrypt';
+
+@Injectable()
+export class SignService {
+  constructor(
+    @InjectRepository(User) // User 엔티티의 Repository 주입
+    private readonly userRepository: Repository<User>,
+
+    @InjectRepository(RefreshToken) // RefreshToken 엔티티의 Repository 주입
+    private readonly refreshTokenRepository: Repository<RefreshToken>,
+
+    private readonly jwtService: JwtService,
+  ) {}
+
+  // 회원가입 로직
+  async signUp(dto: SignUpRequestDto): Promise<void> {
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const user = this.userRepository.create({
+      email: dto.email,
+      nickname: dto.nickname,
+      password: hashedPassword,
+    });
+    await this.userRepository.save(user);
+  }
+
+  // 로그인 로직
+  async signIn(dto: SignInRequestDto): Promise<SignInResultDto> {
+    // 이메일을 통해 유저를 찾을 때 'where' 옵션을 사용
+    const user = await this.userRepository.findOne({
+      where: { email: dto.email },
+    });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    const isPasswordMatching = await bcrypt.compare(
+      dto.password,
+      user.password,
+    );
+
+    if (!isPasswordMatching) throw new NotFoundException('Invalid credentials');
+
+    const atk = this.getAccessToken(user);
+    const rtk = this.getRefreshToken();
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // 7일 만료 기간
+
+    // Refresh Token을 DB에 저장
+    const refreshTokenEntity = this.refreshTokenRepository.create({
+      token: rtk,
+      user,
+      expiresAt,
+    });
+    await this.refreshTokenRepository.save(refreshTokenEntity);
+
+    return {
+      token: { atk, rtk },
+    };
+  }
+
+  // 로그아웃 로직
+  async logout(userId: number): Promise<void> {
+    // userId를 기반으로 사용자 검색 시 'where' 옵션 사용
+    const user = await this.userRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    // 유저와 관련된 모든 Refresh Token을 DB에서 삭제
+    await this.refreshTokenRepository.delete({ user });
+  }
+
+  // 액세스 토큰 생성
+  private getAccessToken(user: User): string {
+    return this.jwtService.sign(
+      { id: user.user_id, roles: user.user_roles },
+      { expiresIn: '1h' },
+    );
+  }
+
+  // 리프레시 토큰 생성
+  private getRefreshToken(): string {
+    return this.jwtService.sign({}, { expiresIn: '7d' });
   }
 }

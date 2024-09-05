@@ -1,4 +1,3 @@
-// src/res/user/entities/user.entity.ts
 import {
   Entity,
   Column,
@@ -9,68 +8,69 @@ import {
 } from 'typeorm';
 import { Post } from '../../post/entities/post.entity';
 import { Login } from '../../login/entities/login.entity';
+import { RefreshToken } from '../../refresh-token/entities/RefreshToken.entity';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  user_id: number; // 자동으로 1씩 증가하는 primary key
+  user_id: number;
 
   @Column({ nullable: false })
-  username: string; // NOT NULL
+  nickname: string;
 
   @Column({ nullable: false, unique: true })
-  email: string; // NOT NULL 및 UNIQUE
+  email: string;
 
   @Column({ nullable: false })
-  password: string; // NOT NULL
+  password: string;
 
   @Column({ nullable: false })
-  department: string; // NOT NULL
+  department: string;
 
   @Column({ nullable: false })
-  age: number; // NOT NULL
+  age: number;
 
   @Column({ type: 'int', nullable: true })
-  user_roles: number | null; // NULL 허용, 정수형
+  user_roles: number | null;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
-  student_id: string | null; // NULL 허용, 학생 ID
+  student_id: string | null;
 
   @Column({ type: 'boolean', default: false })
-  certified: boolean; // NULL 허용, 인증 여부
+  certified: boolean;
 
   @Column({ nullable: true })
-  user_type: string | null; // NULL 허용
+  user_type: string | null;
 
   @Column({ nullable: true })
-  image: string | null; // NULL 허용
+  image: string | null;
 
   @Column({ nullable: true })
-  gender: string | null; // NULL 허용
+  gender: string | null;
 
   @Column({ type: 'int', nullable: true })
-  match_status: number | null; // NULL 허용, 정수형
+  match_status: number | null;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  modified_date_time: Date; // 수정 시 자동 업데이트
+  modified_date_time: Date;
 
   @CreateDateColumn({ type: 'timestamp' })
-  created_date_time: Date; // 생성 시 자동 설정
+  created_date_time: Date;
 
   @Column({ type: 'boolean', nullable: true })
-  smoke: boolean | null; // NULL 허용, 흡연 여부
+  smoke: boolean | null;
 
   @Column({ type: 'varchar', length: 4, nullable: true })
-  mbti: string | null; // NULL 허용, MBTI (최대 4글자)
+  mbti: string | null;
 
   @Column({ type: 'int', nullable: true })
-  snoring: number | null; // NULL 허용, 코골이 정도 (정수형)
+  snoring: number | null;
 
   @Column({ type: 'int', nullable: true })
-  bruxism: number | null; // NULL 허용, 이갈이 정도 (정수형)
+  bruxism: number | null;
 
   @Column({ type: 'text', nullable: true })
-  detail: string | null; // NULL 허용, 텍스트로 상세 정보
+  detail: string | null;
 
   @OneToMany(() => Post, (post) => post.user)
   posts: Post[];
@@ -78,12 +78,11 @@ export class User {
   @OneToMany(() => Login, (login) => login.user)
   logins: Login[];
 
-  @Column({ nullable: true })
-  currentRefreshToken?: string;
-
-  // Refresh Token 만료 시간을 저장할 필드
-  @Column({ type: 'timestamp', nullable: true })
-  currentRefreshTokenExp?: Date;
+  // RefreshToken과의 다대일 관계 추가
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user, {
+    cascade: true,
+  })
+  refreshTokens: RefreshToken[];
 
   @CreateDateColumn()
   createdAt: Date;

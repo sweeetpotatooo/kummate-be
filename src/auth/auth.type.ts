@@ -16,7 +16,7 @@ export interface RefreshTokenPayload {
 }
 
 export interface TokenData {
-  accessToken: string; // 액세스 토큰
-  refreshToken: string; // 리프레시 토큰
+  atk: string; // 액세스 토큰
+  rtk: string; // 리프레시 토큰
   expiresIn: number; // 액세스 토큰의 만료 시간 (초 단위)
 }

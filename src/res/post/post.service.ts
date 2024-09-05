@@ -22,7 +22,7 @@ export class PostService {
       throw new UnauthorizedException('User not found');
     }
 
-    createPostDto.author = user.username; // 작성자 필드를 설정
+    createPostDto.author = user.nickname; // 작성자 필드를 설정
 
     const newPost = this.postRepository.create(createPostDto);
     return this.postRepository.save(newPost);

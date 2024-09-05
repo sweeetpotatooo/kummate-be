@@ -1,3 +1,4 @@
+/*
 import {
   Body,
   Controller,
@@ -7,7 +8,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { SignService } from './auth.service';
 import { LoginDto } from './dto/auth.dto';
 import { Response } from 'express';
 import { JwtRefreshTokenGuard } from './guard/refreshToken.guard';
@@ -34,8 +35,8 @@ export class AuthController {
 
     // 쿠키에 토큰 저장
     res.setHeader('Authorization', 'Bearer ' + Object.values(tokenData));
-    res.cookie('access_token', tokenData.accessToken, { httpOnly: true });
-    res.cookie('refresh_token', tokenData.refreshToken, { httpOnly: true });
+    res.cookie('access_token', tokenData.atk, { httpOnly: true });
+    res.cookie('refresh_token', tokenData.rtk, { httpOnly: true });
 
     return tokenData;
   }
@@ -44,14 +45,14 @@ export class AuthController {
   @Post('refresh')
   async refresh(@Req() req: any, @Res({ passthrough: true }) res: Response) {
     const userId: string = req.user.userId;
-    const refreshToken = req.cookies.refresh_token;
+    const rtk = req.cookies.rtk;
 
     // 새로운 access token 발급
-    const tokenData = await this.authService.refresh(userId, refreshToken);
+    const tokenData = await this.authService.refresh(userId, rtk);
 
     // 쿠키의 access token 교체
-    res.setHeader('Authorization', 'Bearer ' + tokenData.accessToken);
-    res.cookie('access_token', tokenData.accessToken, { httpOnly: true });
+    res.setHeader('Authorization', 'Bearer ' + tokenData.atk);
+    res.cookie('access_token', tokenData.atk, { httpOnly: true });
 
     return tokenData;
   }
@@ -66,5 +67,38 @@ export class AuthController {
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');
     return res.send('logout complete');
+  }
+}
+*/
+import { Controller, Post, Body, Req, UseGuards, Get } from '@nestjs/common';
+import { SignService } from './auth.service';
+import { SignInRequestDto, SignUpRequestDto } from './dto/auth.dto';
+import { JwtAuthGuard } from './guard/jwt-auth.guard';
+import { Request } from 'express';
+
+@Controller('auth')
+export class AuthController {
+  constructor(private readonly signService: SignService) {}
+
+  // 회원가입 엔드포인트
+  @Post('signup')
+  async signUp(@Body() signUpRequestDto: SignUpRequestDto): Promise<void> {
+    // SignService에서 회원가입 처리
+    return this.signService.signUp(signUpRequestDto);
+  }
+
+  // 로그인 엔드포인트
+  @Post('signin')
+  async signIn(@Body() signInRequestDto: SignInRequestDto) {
+    // SignService에서 로그인 처리 및 토큰 반환
+    return this.signService.signIn(signInRequestDto);
+  }
+
+  // JWT가 필요한 요청을 처리하는 엔드포인트
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  async getProfile(@Req() req: Request) {
+    // JWT가 유효하면, 유저 정보 반환 (req.user에서 가져올 수 있음)
+    return req.user;
   }
 }
