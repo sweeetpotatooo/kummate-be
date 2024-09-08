@@ -1,9 +1,14 @@
+//src/auth/strategy/accessToken.strategy.ts
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AccessTokenPayload } from '../auth.type';
+import { AuthGuard } from '@nestjs/passport';
+
+@Injectable()
+export class JwtAuthGuard extends AuthGuard('access_token') {}
 
 @Injectable()
 export class JwtAccessTokenStrategy extends PassportStrategy(
@@ -19,7 +24,7 @@ export class JwtAccessTokenStrategy extends PassportStrategy(
           return request?.cookies?.access_token;
         },
       ]),
-      // access toke  n secret key
+      // access token secret key
       secretOrKey: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
       // 만료된 토큰은 거부
       ignoreExpiration: false,
@@ -30,6 +35,7 @@ export class JwtAccessTokenStrategy extends PassportStrategy(
 
   validate(req: Request, payload: AccessTokenPayload) {
     // request에 저장을 해놔야 Guard후에 controller 메서드에서 사용 가능
+    console.log('Access Token Payload:', payload); // payload 로그 출력
     req.user = payload;
     return payload;
   }

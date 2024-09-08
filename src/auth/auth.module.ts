@@ -12,7 +12,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RefreshToken } from '../res/refresh-token/entities/RefreshToken.entity'; // RefreshToken 엔티티
 import { RefreshTokenService } from '../res/refresh-token/RefreshToken.service'; // 새로 만든 서비스
-
 @Module({
   imports: [
     UserModule,

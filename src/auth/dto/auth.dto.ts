@@ -52,6 +52,11 @@ export class SignInRequestDto {
 export class TokenDto {
   atk: string;
   rtk: string;
+
+  constructor(atk: string, rtk: string) {
+    this.atk = atk;
+    this.rtk = rtk;
+  }
 }
 
 export class SignInResultDto {
@@ -82,5 +87,12 @@ export class OAuth2ProfileDto {
       nickName: data.name,
       imageUrl: data.picture,
     };
+  }
+}
+export class LogOutResultDto {
+  expiredToken: TokenDto;
+
+  constructor(expiredToken: TokenDto) {
+    this.expiredToken = expiredToken;
   }
 }
