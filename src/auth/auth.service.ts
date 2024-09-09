@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -42,7 +43,6 @@ export class SignService {
 
   // 로그인 로직
   async signIn(dto: SignInRequestDto): Promise<SignInResultDto> {
-    // 이메일을 통해 유저를 찾을 때 'where' 옵션을 사용
     const user = await this.userRepository.findOne({
       where: { email: dto.email },
     });
@@ -62,7 +62,6 @@ export class SignService {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7일 만료 기간
 
-    // Refresh Token을 DB에 저장
     const refreshTokenEntity = this.refreshTokenRepository.create({
       token: rtk,
       user,
@@ -76,32 +75,46 @@ export class SignService {
   }
 
   // 로그아웃 로직
-  async logout(userId: number): Promise<LogOutResultDto> {
-    // userId를 기반으로 사용자를 검색
-    const user = await this.userRepository.findOne({
-      where: { user_id: userId },
-    });
+  async logout(userId: number, token: string): Promise<LogOutResultDto> {
+    const jwtService = new JwtService();
+    try {
+      // 토큰을 검증하고, 토큰의 정보를 로그로 출력
+      const decodedToken = this.jwtService.verify(token);
+      console.log('Decoded Token:', decodedToken);
 
-    // 사용자가 없으면 예외 발생
-    if (!user) {
-      throw new NotFoundException('User not found');
+      // userId를 기반으로 사용자를 검색
+      const user = await this.userRepository.findOne({
+        where: { user_id: userId },
+      });
+
+      // 사용자가 없으면 예외 발생
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // 사용자의 모든 Refresh Token을 DB에서 삭제
+      await this.refreshTokenRepository.delete({ user });
+      console.log(`사용자 ${userId}의 리프레시 토큰을 삭제했습니다.`);
+
+      // 만료된 토큰 정보를 반환
+      const expiredToken = new TokenDto('', ''); // Refresh Token 삭제 시, 실제로 만료된 토큰 정보를 넣을 수 있음
+
+      // 로그아웃 결과 반환
+      return new LogOutResultDto(expiredToken);
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        console.error('Token has expired');
+        throw new UnauthorizedException('Token has expired');
+      } else if (error.name === 'JsonWebTokenError') {
+        console.error('Invalid token');
+        throw new UnauthorizedException('Invalid token');
+      } else {
+        console.error('Logout error:', error); // 에러를 로그로 출력
+        throw new InternalServerErrorException(
+          '로그아웃 처리 중 오류가 발생했습니다.',
+        );
+      }
     }
-
-    // 사용자의 모든 Refresh Token을 DB에서 삭제
-    await this.refreshTokenRepository.delete({ user });
-    console.log(`사용자 ${userId}의 리프레시 토큰을 삭제했습니다.`);
-
-    // 만료된 토큰 정보를 반환
-    const expiredToken = new TokenDto('', ''); // Refresh Token 삭제 시, 실제로 만료된 토큰 정보를 넣을 수 있음
-
-    // 로그아웃 결과 반환
-    return new LogOutResultDto(expiredToken);
-  }
-  catch(error) {
-    console.error('Logout error:', error); // 에러를 로그로 출력
-    throw new InternalServerErrorException(
-      '로그아웃 처리 중 오류가 발생했습니다.',
-    );
   }
 
   // 액세스 토큰 생성 메소드
@@ -116,6 +129,7 @@ export class SignService {
       },
     );
   }
+
   // 리프레시 토큰 생성
   private getRefreshToken(): string {
     return this.jwtService.sign({}, { expiresIn: '7d' });

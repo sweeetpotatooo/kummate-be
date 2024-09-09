@@ -14,6 +14,7 @@ import { LogOutResultDto } from './dto/auth.dto';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { Request } from 'express';
 import { ApiOperation } from '@nestjs/swagger';
+import { CustomRequest } from './interfaces/jwtpayload.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -45,10 +46,11 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async logout(@Req() req: Request): Promise<LogOutResultDto> {
+  async logout(@Req() req: CustomRequest): Promise<LogOutResultDto> {
     console.log('User info from token:', req.user); // 로그로 확인
-    const userId = (req.user as { id: number }).id; // 타입을 명시적으로 캐스팅
-    const result = await this.signService.logout(userId);
+    const userId = req.user.id;
+    const token = req.user.token;
+    const result = await this.signService.logout(userId, token);
     return result;
   }
 }
