@@ -1,5 +1,0 @@
-import { Injectable } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-
-@Injectable()
-export class JwtAuthGuard extends AuthGuard('access_token') {} // 'access_token' 전략 사용

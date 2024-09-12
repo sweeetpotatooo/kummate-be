@@ -79,6 +79,7 @@ export class SignService {
     const jwtService = new JwtService();
     try {
       // 토큰을 검증하고, 토큰의 정보를 로그로 출력
+      console.log(`token:`, token);
       const decodedToken = this.jwtService.verify(token);
       console.log('Decoded Token:', decodedToken);
 

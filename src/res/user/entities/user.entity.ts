@@ -89,4 +89,10 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ nullable: true })
+  atk: string | null;
+
+  @Column({ nullable: true })
+  rtk: string | null;
 }

@@ -18,13 +18,8 @@ export class JwtAccessTokenStrategy extends PassportStrategy(
   constructor(private readonly configService: ConfigService) {
     super({
       // request의 쿠키에서 refresh token을 가져옴
-      jwtFromRequest: ExtractJwt.fromExtractors([
-        (request) => {
-          console.log(request.cookies);
-          return request?.cookies?.access_token;
-        },
-      ]),
-      // access token secret key
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+
       secretOrKey: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
       // 만료된 토큰은 거부
       ignoreExpiration: false,
