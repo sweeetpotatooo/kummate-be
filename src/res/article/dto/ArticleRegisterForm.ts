@@ -11,7 +11,7 @@ export class ArticleRegisterForm {
   @IsString()
   region: string;
 
-  @ApiProperty({ description: '기간', example: '20 ~ 22' })
+  @ApiProperty({ description: '나이대', example: '20 ~ 22' })
   @IsString()
   ageGroup: string;
 

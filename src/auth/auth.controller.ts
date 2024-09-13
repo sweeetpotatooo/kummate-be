@@ -15,7 +15,6 @@ import { JwtAccessTokenGuard } from './guard/accessToken.guard';
 import { Request } from 'express';
 import { ApiOperation } from '@nestjs/swagger';
 import { CustomRequest } from './interfaces/jwtpayload.interface';
-import { hostname } from 'os';
 
 @Controller('auth')
 export class AuthController {
@@ -50,8 +49,7 @@ export class AuthController {
   async logout(@Req() req: CustomRequest): Promise<LogOutResultDto> {
     console.log('User info from token:', req.user); // 로그로 확인
     const userId = req.user.id;
-    const token = req.headers.authorization.split(' ');
-    const result = await this.signService.logout(userId, token[1]);
+    const result = await this.signService.logout(userId);
     console.log(`result: ${result}`);
     return result;
   }

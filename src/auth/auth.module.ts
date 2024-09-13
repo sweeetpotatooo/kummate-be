@@ -7,15 +7,14 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtAccessTokenStrategy } from './strategy/accessToken.strategy';
 import { JwtRefreshTokenStrategy } from './strategy/refreshToken.strategy';
 import { JwtAccessTokenGuard } from './guard/accessToken.guard';
-import { JwtRefreshTokenGuard } from '../res/refresh-token/guard/refreshToken.guard';
+import { JwtRefreshTokenGuard } from './guard/refreshToken.guard';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RefreshToken } from '../res/refresh-token/entities/RefreshToken.entity'; // RefreshToken 엔티티
-import { RefreshTokenService } from '../res/refresh-token/RefreshToken.service'; // 새로 만든 서비스
+import { User } from 'src/res/user/entities/user.entity';
 @Module({
   imports: [
     UserModule,
-    TypeOrmModule.forFeature([RefreshToken]), // RefreshToken 엔티티 등록
+    TypeOrmModule.forFeature([User]), // RefreshToken 엔티티 등록
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -28,12 +27,11 @@ import { RefreshTokenService } from '../res/refresh-token/RefreshToken.service';
   controllers: [AuthController],
   providers: [
     SignService,
-    RefreshTokenService, // 서비스 주입
     JwtAccessTokenStrategy,
     JwtRefreshTokenStrategy,
     JwtAccessTokenGuard,
     JwtRefreshTokenGuard,
   ],
-  exports: [SignService, RefreshTokenService], // 서비스 export
+  exports: [SignService], // 서비스 export
 })
 export class AuthModule {}

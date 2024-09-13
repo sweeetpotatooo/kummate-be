@@ -1,14 +1,8 @@
-import {
-  Injectable,
-  NotFoundException,
-  InternalServerErrorException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../res/user/entities/user.entity';
-import { RefreshToken } from '../res/refresh-token/entities/RefreshToken.entity';
 import {
   SignUpRequestDto,
   SignInRequestDto,
@@ -21,108 +15,83 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class SignService {
   constructor(
-    @InjectRepository(User) // User 엔티티의 Repository 주입
+    @InjectRepository(User) // User 엔티티의 Repository를 주입받아 DB와 상호작용
     private readonly userRepository: Repository<User>,
 
-    @InjectRepository(RefreshToken) // RefreshToken 엔티티의 Repository 주입
-    private readonly refreshTokenRepository: Repository<RefreshToken>,
-
-    private readonly jwtService: JwtService,
+    private readonly jwtService: JwtService, // JWT 관련 기능을 제공하는 JwtService 주입
   ) {}
 
-  // 회원가입 로직
+  // 회원가입 로직 (변경 없음)
   async signUp(dto: SignUpRequestDto): Promise<void> {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
+
     const user = this.userRepository.create({
       email: dto.email,
       nickname: dto.nickname,
       password: hashedPassword,
     });
+
     await this.userRepository.save(user);
   }
 
   // 로그인 로직
   async signIn(dto: SignInRequestDto): Promise<SignInResultDto> {
+    // 이메일을 기준으로 DB에서 사용자 조회
     const user = await this.userRepository.findOne({
       where: { email: dto.email },
     });
 
+    // 사용자가 존재하지 않으면 예외 발생
     if (!user) throw new NotFoundException('User not found');
 
+    // 입력된 비밀번호와 저장된 해시된 비밀번호가 일치하는지 확인
     const isPasswordMatching = await bcrypt.compare(
       dto.password,
       user.password,
     );
 
+    // 비밀번호가 일치하지 않으면 예외 발생
     if (!isPasswordMatching) throw new NotFoundException('Invalid credentials');
 
+    // 액세스 토큰을 생성
     const atk = this.getAccessToken(user);
+
+    // 리프레시 토큰을 생성
     const rtk = this.getRefreshToken();
 
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7); // 7일 만료 기간
+    // 생성된 액세스 토큰과 리프레시 토큰을 유저 엔티티에 저장
+    user.accessToken = atk;
+    user.refreshToken = rtk;
+    await this.userRepository.save(user); // 변경된 유저 정보를 DB에 저장
 
-    const refreshTokenEntity = this.refreshTokenRepository.create({
-      token: rtk,
-      user,
-      expiresAt,
-    });
-    await this.refreshTokenRepository.save(refreshTokenEntity);
-
+    // 액세스 토큰과 리프레시 토큰을 반환
     return {
       token: { atk, rtk },
     };
   }
 
-  // 로그아웃 로직
-  async logout(userId: number, token: string): Promise<LogOutResultDto> {
-    const jwtService = new JwtService();
-    try {
-      // 토큰을 검증하고, 토큰의 정보를 로그로 출력
-      console.log(`token:`, token);
-      const decodedToken = this.jwtService.verify(token);
-      console.log('Decoded Token:', decodedToken);
+  async logout(userId: number): Promise<LogOutResultDto> {
+    const user = await this.userRepository.findOne({
+      where: { user_id: userId },
+    });
 
-      // userId를 기반으로 사용자를 검색
-      const user = await this.userRepository.findOne({
-        where: { user_id: userId },
-      });
-
-      // 사용자가 없으면 예외 발생
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
-
-      // 사용자의 모든 Refresh Token을 DB에서 삭제
-      await this.refreshTokenRepository.delete({ user });
-      console.log(`사용자 ${userId}의 리프레시 토큰을 삭제했습니다.`);
-
-      // 만료된 토큰 정보를 반환
-      const expiredToken = new TokenDto('', ''); // Refresh Token 삭제 시, 실제로 만료된 토큰 정보를 넣을 수 있음
-
-      // 로그아웃 결과 반환
-      return new LogOutResultDto(expiredToken);
-    } catch (error) {
-      if (error.name === 'TokenExpiredError') {
-        console.error('Token has expired');
-        throw new UnauthorizedException('Token has expired');
-      } else if (error.name === 'JsonWebTokenError') {
-        console.error('Invalid token');
-        throw new UnauthorizedException('Invalid token');
-      } else {
-        console.error('Logout error:', error); // 에러를 로그로 출력
-        throw new InternalServerErrorException(
-          '로그아웃 처리 중 오류가 발생했습니다.',
-        );
-      }
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
+
+    user.refreshToken = null;
+    user.accessToken = null;
+    await this.userRepository.save(user);
+
+    const expiredToken = new TokenDto('', '');
+    return new LogOutResultDto(expiredToken);
   }
 
   // 액세스 토큰 생성 메소드
   private getAccessToken(user: User): string {
     return this.jwtService.sign(
       {
-        id: user.user_id, // user_id를 id로 매핑
+        id: user.user_id,
         roles: user.user_roles,
       },
       {
@@ -131,7 +100,7 @@ export class SignService {
     );
   }
 
-  // 리프레시 토큰 생성
+  // 리프레시 토큰 생성 메소드
   private getRefreshToken(): string {
     return this.jwtService.sign({}, { expiresIn: '7d' });
   }

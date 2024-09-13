@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNumber, IsBoolean, IsDate } from 'class-validator';
-import { Article } from '../entity/article.entity'; // Article 엔티티 경로를 맞게 수정
-import { User } from '../entity/user.entity'; // User 엔티티가 필요할 경우 import
+import { Article } from '../entities/article.entity'; // Article 엔티티 경로를 맞게 수정
 
 export class ArticlePageDto {
   @ApiProperty({ description: 'ID' })

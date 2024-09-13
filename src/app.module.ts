@@ -8,7 +8,6 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmModuleOptions } from './config/typeorm.config';
 import { LoginModule } from './res/login/login.module';
-import { RefreshTokenModule } from './res/refresh-token/RefreshToken.module';
 
 @Module({
   imports: [
@@ -20,7 +19,6 @@ import { RefreshTokenModule } from './res/refresh-token/RefreshToken.module';
     PostModule,
     AuthModule,
     LoginModule,
-    RefreshTokenModule,
     TypeOrmModule.forRoot(typeOrmModuleOptions), // 직접 하드코딩한 설정을 사용
   ],
 })

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArticlePageDto } from './article-page.dto';
-import { Article } from '../entity/article.entity';
+import { ArticlePageDto } from './ArticlePageDto';
+import { Article } from '../entities/article.entity';
 
 export class ArticlePageResultDto {
   @ApiProperty({ description: '전체 게시물 수' })

@@ -1,5 +1,5 @@
 import { IsNumber, IsString } from 'class-validator';
-import { Article } from '../entity/article.entity';
+import { Article } from '../entities/article.entity';
 
 export class ArticleInfoDto {
   @IsNumber()
