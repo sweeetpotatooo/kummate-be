@@ -6,8 +6,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Post } from '../../post/entities/post.entity';
-import { Login } from '../../login/entities/login.entity';
 import { UserType } from 'src/res/types/usertype.enum';
 import { MatchStatus } from 'src/res/types/MatchStatus.enum';
 import { ActivityTime } from 'src/res/types/activitytime.enum';
@@ -16,6 +14,7 @@ import { Dorm } from 'src/res/types/dorm.enum';
 import { Mbti } from 'src/res/types/mbti.enum';
 import { Department } from 'src/res/types/department.enum';
 import { BaseEntity } from 'src/res/entities/Base.entity';
+import { Article } from 'src/res/article/entities/article.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -37,8 +36,8 @@ export class User extends BaseEntity {
   @Column({ nullable: false })
   age: number;
 
-  @Column({ type: 'number', nullable: true })
-  student_id: string | null;
+  @Column({ type: 'int', nullable: true })
+  student_id: number;
 
   @Column({ type: 'boolean', default: false })
   certified: boolean;
@@ -48,6 +47,9 @@ export class User extends BaseEntity {
 
   @Column({ nullable: true })
   image?: string;
+
+  @Column({ type: 'varchar' })
+  user_roles: string;
 
   @Column({ type: 'enum', enum: MatchStatus })
   matchStatus: MatchStatus;
@@ -73,17 +75,8 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   detail?: string;
 
-  @Column({ type: 'int', nullable: true })
-  snoring: number | null;
-
-  @Column({ type: 'int', nullable: true })
-  bruxism: number | null;
-
-  @OneToMany(() => Post, (post) => post.user)
-  posts: Post[];
-
-  @OneToMany(() => Login, (login) => login.user)
-  logins: Login[];
+  @OneToMany(() => Article, (article) => article.user)
+  articles: Article[]; // 여러 개의 Article을 가질 수 있음
 
   // 액세스 토큰과 리프레시 토큰을 추가
   @Column({ nullable: true })

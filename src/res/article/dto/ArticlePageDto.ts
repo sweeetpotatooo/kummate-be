@@ -45,7 +45,7 @@ export class ArticlePageDto {
 
   @ApiProperty({ description: '흡연여부' })
   @IsNumber()
-  smoke: string;
+  smoke: boolean;
 
   @ApiProperty({ description: '모집 중 여부' })
   @IsBoolean()
@@ -62,7 +62,7 @@ export class ArticlePageDto {
     createdDate: Date,
     region: string,
     ageGroup: string,
-    smoke: string,
+    smoke: boolean,
     isRecruiting: boolean,
   ) {
     this.id = id;
@@ -87,11 +87,11 @@ export class ArticlePageDto {
       article.user.image,
       article.user.nickname,
       article.content,
-      article.user.gender.value,
+      article.user.gender,
       article.createDate,
-      article.region.value,
-      article.period.value,
-      article.price,
+      article.region,
+      article.ageGroup,
+      article.smoke,
       article.isRecruiting,
     );
   }

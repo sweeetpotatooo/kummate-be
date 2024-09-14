@@ -47,6 +47,9 @@ export class Article extends BaseEntity {
   })
   gender: Gender;
 
+  @Column({ name: 'smoke', type: 'boolean' })
+  smoke: boolean;
+
   @Column({ name: 'is_recruit', type: 'boolean', default: true })
   isRecruiting: boolean;
 

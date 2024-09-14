@@ -9,7 +9,6 @@ import {
   Min,
 } from 'class-validator';
 import { User } from '../entities/user.entity';
-import { Type } from 'class-transformer';
 import { Gender } from '../../types/gender.enum';
 import { MatchStatus } from '../../types/MatchStatus.enum';
 import { Mbti } from '../../types/mbti.enum';
@@ -44,7 +43,7 @@ export class UserDto {
   @IsBoolean()
   isSmoker: boolean;
 
-  @Type(() => ActivityTime)
+  @IsEnum(ActivityTime)
   activityTime: ActivityTime;
 
   @IsEnum(Gender)
