@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmModuleOptions } from './config/typeorm.config';
+import { MycontentsModule } from './res/mycontents/mycontents.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { typeOrmModuleOptions } from './config/typeorm.config';
     }),
     UserModule,
     AuthModule,
+    MycontentsModule,
     TypeOrmModule.forRoot(typeOrmModuleOptions), // 직접 하드코딩한 설정을 사용
   ],
 })

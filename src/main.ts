@@ -22,10 +22,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
 
-  // AuthService 주입 받기
-
-  // AuthService 인스턴스를 AuthGuard에 전달
-
   await app.listen(3001);
 
   // Hot Reload 설정

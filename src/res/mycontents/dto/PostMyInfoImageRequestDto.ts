@@ -1,7 +1,6 @@
 // src/dto/post-my-info-image-request.dto.ts
-
+/*
 import { IsNotEmpty } from 'class-validator';
-import { File } from 'multer'; // multer에서 직접 가져옵니다.
 
 export class PostMyInfoImageRequestDto {
   @IsNotEmpty()
@@ -11,3 +10,4 @@ export class PostMyInfoImageRequestDto {
     this.image = image;
   }
 }
+*/

@@ -18,14 +18,6 @@ export class PatchMyInfoForm {
   @IsOptional()
   myAge?: number;
 
-  @IsInt()
-  @IsOptional()
-  minAge?: number;
-
-  @IsInt()
-  @IsOptional()
-  maxAge?: number;
-
   @IsBoolean()
   @IsNotEmpty()
   isSmoke: boolean;
@@ -33,6 +25,10 @@ export class PatchMyInfoForm {
   @IsString()
   @IsOptional()
   mbti?: string;
+
+  @IsString()
+  @IsOptional()
+  ageGroup?: string;
 
   @IsString()
   @IsOptional()
@@ -55,8 +51,6 @@ export class PatchMyInfoForm {
     const dto = new PatchMyInfoRequestDto();
     dto.gender = form.gender;
     dto.myAge = form.myAge;
-    dto.minAge = form.minAge;
-    dto.maxAge = form.maxAge;
     dto.isSmoke = form.isSmoke;
     dto.activityTime = form.activityTime;
     dto.region = form.region;

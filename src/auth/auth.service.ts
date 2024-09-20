@@ -21,7 +21,7 @@ export class SignService {
     private readonly jwtService: JwtService, // JWT 관련 기능을 제공하는 JwtService 주입
   ) {}
 
-  // 회원가입 로직 (변경 없음)
+  // 회원가입 로직
   async signUp(dto: SignUpRequestDto): Promise<void> {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
