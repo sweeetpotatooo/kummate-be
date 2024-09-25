@@ -11,7 +11,7 @@ import { MyContentService } from './mycontents.service';
 import { MyInfoDto } from './dto/MyInfoDto';
 import { PatchMyInfoForm } from './dto/PatchMyInfoForm';
 import { PatchMyNicknameForm } from './dto/PatchMyNicknameForm';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard'; // JWT 인증 Guard
+import { JwtAccessTokenGuard } from '../../auth/guard/accessToken.guard'; // JWT 인증 Guard
 import { PatchMyNicknameResult } from './dto/PatchMyNicknameResult';
 import { PatchMyInfoResultDto } from './dto/PatchMyInfoResultDto';
 
@@ -20,7 +20,7 @@ import { PatchMyInfoResultDto } from './dto/PatchMyInfoResultDto';
 export class MyContentController {
   constructor(private readonly myContentService: MyContentService) {}
 
-  @UseGuards(JwtAuthGuard) // JWT 인증 적용
+  @UseGuards(JwtAccessTokenGuard) // JWT 인증 적용
   @ApiOperation({
     summary: '내정보 불러오기',
     description: '로그인 정보(토큰)를 바탕으로 자신의 정보를 가져옵니다.',
@@ -31,7 +31,7 @@ export class MyContentController {
     return this.myContentService.getMyInfo(user);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAccessTokenGuard)
   @ApiOperation({
     summary: '닉네임 변경',
     description: '로그인 정보(토큰)를 이용해 닉네임을 변경합니다.',
@@ -45,7 +45,7 @@ export class MyContentController {
     return this.myContentService.patchNickname(user, form);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAccessTokenGuard)
   @ApiOperation({
     summary: '사용자 정보 변경',
     description: '로그인 정보(토큰)를 통해 내 정보를 변경합니다.',

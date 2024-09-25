@@ -36,6 +36,10 @@ export class PatchMyInfoForm {
 
   @IsString()
   @IsOptional()
+  dorm?: string;
+
+  @IsString()
+  @IsOptional()
   activityTime?: string;
 
   @IsArray()
@@ -56,6 +60,7 @@ export class PatchMyInfoForm {
     dto.region = form.region;
     dto.mbti = form.mbti;
     dto.tags = form.favoriteTag || [];
+    dto.dorm = form.dorm;
     dto.detail = form.myText;
     return dto;
   }
@@ -70,14 +75,6 @@ export class PatchMyInfoRequestDto {
   @IsOptional()
   myAge?: number;
 
-  @IsInt()
-  @IsOptional()
-  minAge?: number;
-
-  @IsInt()
-  @IsOptional()
-  maxAge?: number;
-
   @IsBoolean()
   @IsOptional()
   isSmoke?: boolean;
@@ -89,6 +86,10 @@ export class PatchMyInfoRequestDto {
   @IsString()
   @IsOptional()
   region?: string;
+
+  @IsString()
+  @IsOptional()
+  dorm?: string;
 
   @IsString()
   @IsOptional()

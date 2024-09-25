@@ -1,5 +1,5 @@
 /**
- * 활동 시간(`Acti`vityTime)에 대한 enum 정의
+ * 활동 시간(`ActivityTime)에 대한 enum 정의
  * 각 값은 한국어 문자열로 매핑됨
  */
 export enum ActivityTime {

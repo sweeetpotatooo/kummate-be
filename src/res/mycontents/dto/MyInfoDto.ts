@@ -18,6 +18,10 @@ export class MyInfoDto {
   @IsNotEmpty()
   nickname: string;
 
+  @IsInt()
+  @IsOptional()
+  age?: number;
+
   @IsString()
   @IsOptional()
   image?: string;
@@ -49,14 +53,6 @@ export class MyInfoDto {
 
   @IsInt()
   @IsOptional()
-  minAge?: number;
-
-  @IsInt()
-  @IsOptional()
-  maxAge?: number;
-
-  @IsInt()
-  @IsOptional()
   myAge?: number;
 
   @IsString()
@@ -67,15 +63,14 @@ export class MyInfoDto {
     const dto = new MyInfoDto();
     dto.email = user.email;
     dto.nickname = user.nickname;
+    dto.age = user.age;
     dto.image = user.image;
     dto.isSmoker = user.isSmoker;
-    dto.activityTime = user.activityTime ? user.activityTime.value : 'null';
-    dto.gender = user.gender ? user.gender.value : 'null';
-    dto.region = user.region ? user.region.value : 'null';
-    dto.mbti = user.mbti ? user.mbti.name : 'null';
+    dto.activityTime = user.activityTime || null;
+    dto.gender = user.gender || null;
+    dto.region = user.region || null;
+    dto.mbti = user.mbti || null;
     dto.tags = user.tag || [];
-    dto.minAge = user.minAge;
-    dto.maxAge = user.maxAge;
     dto.myAge = user.myAge;
     dto.detail = user.detail;
     return dto;

@@ -17,14 +17,6 @@ export class PatchMyInfoRequestDto {
   @IsOptional()
   myAge?: number;
 
-  @IsInt()
-  @IsOptional()
-  minAge?: number;
-
-  @IsInt()
-  @IsOptional()
-  maxAge?: number;
-
   @IsBoolean()
   @IsOptional()
   isSmoke?: boolean;
@@ -49,4 +41,8 @@ export class PatchMyInfoRequestDto {
   @IsString()
   @IsOptional()
   detail?: string;
+
+  @IsString()
+  @IsOptional()
+  dorm?: string;
 }
