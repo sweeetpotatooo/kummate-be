@@ -18,6 +18,8 @@ import { Gender } from '../types/gender.enum';
 import { Mbti } from '../types/mbti.enum';
 import { ActivityTime } from '../types/activitytime.enum';
 import { Dorm } from '../types/dorm.enum';
+import { ageGroup } from '../types/ageGroup.enum';
+
 @Injectable()
 export class MyContentService {
   constructor(
@@ -46,6 +48,7 @@ export class MyContentService {
       const result = await this.userRepository.save(user);
       return { nickname: result.nickname };
     } catch (error) {
+      console.error('Error while changing nickname:', error); // 에러 로그 추가
       if (error.code === '23505') {
         // 고유 제약 조건 위반 (닉네임 중복)
         throw new HttpException(
@@ -170,8 +173,33 @@ export class MyContentService {
       );
     }
 
+    // 연령대 매핑 추가
+    const mapAgeGroup = (ageGroupStr: string): ageGroup | undefined => {
+      switch (ageGroupStr) {
+        case '20 ~ 22':
+          return ageGroup.age1;
+        case '23 ~ 25':
+          return ageGroup.age2;
+        case '26 ~ ':
+          return ageGroup.age3;
+        default:
+          return undefined;
+      }
+    };
+
+    const mappedAgeGroup = mapAgeGroup(form.ageGroup);
+
+    if (mappedAgeGroup !== undefined) {
+      user.ageGroup = mappedAgeGroup;
+    } else {
+      throw new HttpException(
+        '유효하지 않은 연령대 값입니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     // 나머지 필드 할당
-    user.age = form.myAge;
+    user.age = form.age;
     user.isSmoker = form.isSmoke;
 
     // 태그와 상세 내용 할당

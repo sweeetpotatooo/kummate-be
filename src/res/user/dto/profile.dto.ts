@@ -53,7 +53,7 @@ export class ProfileDto {
   @IsInt()
   @Min(18)
   @Max(100)
-  myAge: number;
+  age: number;
 
   @IsOptional()
   @IsString()
@@ -73,7 +73,7 @@ export class ProfileDto {
     dto.region = user.region ? Dorm[user.region] : null;
     dto.mbti = user.mbti ? Mbti[user.mbti] : null;
     dto.tags = user.tags || [];
-    dto.myAge = user.myAge;
+    dto.age = user.age;
     dto.detail = user.detail || null;
     return dto;
   }

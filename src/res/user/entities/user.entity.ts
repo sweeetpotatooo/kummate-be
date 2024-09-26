@@ -15,6 +15,7 @@ import { Mbti } from 'src/res/types/mbti.enum';
 import { Department } from 'src/res/types/department.enum';
 import { BaseEntity } from 'src/res/entities/Base.entity';
 import { Article } from 'src/res/article/entities/article.entity';
+import { ageGroup } from 'src/res/types/ageGroup.enum';
 
 @Entity()
 export class User extends BaseEntity {
@@ -74,6 +75,9 @@ export class User extends BaseEntity {
 
   @Column({ nullable: true })
   detail?: string;
+
+  @Column({ type: 'enum', enum: ageGroup })
+  ageGroup?: ageGroup;
 
   @OneToMany(() => Article, (article) => article.user)
   articles: Article[]; // 여러 개의 Article을 가질 수 있음

@@ -15,15 +15,7 @@ export class PatchMyInfoResultDto {
 
   @IsInt()
   @IsOptional()
-  myAge?: number;
-
-  @IsInt()
-  @IsOptional()
-  minAge?: number;
-
-  @IsInt()
-  @IsOptional()
-  maxAge?: number;
+  age?: number;
 
   @IsBoolean()
   @IsOptional()
@@ -50,13 +42,18 @@ export class PatchMyInfoResultDto {
   @IsOptional()
   detail?: string;
 
+  @IsString()
+  @IsOptional()
+  ageGroup?: string;
+
   static from(user: User): PatchMyInfoResultDto {
     const dto = new PatchMyInfoResultDto();
     dto.gender = user.gender ? user.gender : null;
-    dto.myAge = user.age;
+    dto.age = user.age;
     dto.isSmoke = user.isSmoker;
     dto.mbti = user.mbti ? user.mbti : null;
     dto.region = user.region ? user.region : null;
+    dto.ageGroup = user.ageGroup ? user.ageGroup : null;
     dto.activityTime = user.activityTime ? user.activityTime : null;
     dto.tags = user.tags ? Array.from(user.tags) : [];
     dto.detail = user.detail;

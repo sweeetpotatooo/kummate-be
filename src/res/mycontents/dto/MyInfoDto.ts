@@ -46,14 +46,14 @@ export class MyInfoDto {
   @IsOptional()
   mbti?: string;
 
+  @IsString()
+  @IsOptional()
+  ageGroup?: string;
+
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
   tags?: string[];
-
-  @IsInt()
-  @IsOptional()
-  myAge?: number;
 
   @IsString()
   @IsOptional()
@@ -69,9 +69,10 @@ export class MyInfoDto {
     dto.activityTime = user.activityTime || null;
     dto.gender = user.gender || null;
     dto.region = user.region || null;
+    dto.ageGroup = user.ageGroup || null;
     dto.mbti = user.mbti || null;
     dto.tags = user.tag || [];
-    dto.myAge = user.myAge;
+    dto.age = user.age;
     dto.detail = user.detail;
     return dto;
   }

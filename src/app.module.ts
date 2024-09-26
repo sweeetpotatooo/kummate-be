@@ -7,6 +7,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmModuleOptions } from './config/typeorm.config';
 import { MycontentsModule } from './res/mycontents/mycontents.module';
+import { AwsModule } from './upload/upload.module';
+import { BoardModule } from './res/board/board.module';
 
 @Module({
   imports: [
@@ -17,7 +19,9 @@ import { MycontentsModule } from './res/mycontents/mycontents.module';
     UserModule,
     AuthModule,
     MycontentsModule,
-    TypeOrmModule.forRoot(typeOrmModuleOptions), // 직접 하드코딩한 설정을 사용
+    TypeOrmModule.forRoot(typeOrmModuleOptions),
+    AwsModule,
+    BoardModule, // 직접 하드코딩한 설정을 사용
   ],
 })
 export class AppModule implements NestModule {

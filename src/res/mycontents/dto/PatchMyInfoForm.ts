@@ -16,7 +16,7 @@ export class PatchMyInfoForm {
 
   @IsInt()
   @IsOptional()
-  myAge?: number;
+  age?: number;
 
   @IsBoolean()
   @IsNotEmpty()
@@ -54,7 +54,7 @@ export class PatchMyInfoForm {
   static toDto(form: PatchMyInfoForm): PatchMyInfoRequestDto {
     const dto = new PatchMyInfoRequestDto();
     dto.gender = form.gender;
-    dto.myAge = form.myAge;
+    dto.age = form.age;
     dto.isSmoke = form.isSmoke;
     dto.activityTime = form.activityTime;
     dto.region = form.region;
@@ -62,6 +62,7 @@ export class PatchMyInfoForm {
     dto.tags = form.favoriteTag || [];
     dto.dorm = form.dorm;
     dto.detail = form.myText;
+    dto.ageGroup = form.ageGroup;
     return dto;
   }
 }
@@ -73,7 +74,7 @@ export class PatchMyInfoRequestDto {
 
   @IsInt()
   @IsOptional()
-  myAge?: number;
+  age?: number;
 
   @IsBoolean()
   @IsOptional()
@@ -103,4 +104,5 @@ export class PatchMyInfoRequestDto {
   @IsString()
   @IsOptional()
   detail?: string;
+  ageGroup: string;
 }

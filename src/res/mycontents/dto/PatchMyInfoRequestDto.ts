@@ -15,7 +15,7 @@ export class PatchMyInfoRequestDto {
 
   @IsInt()
   @IsOptional()
-  myAge?: number;
+  age?: number;
 
   @IsBoolean()
   @IsOptional()
@@ -45,4 +45,8 @@ export class PatchMyInfoRequestDto {
   @IsString()
   @IsOptional()
   dorm?: string;
+
+  @IsString()
+  @IsOptional()
+  ageGroup?: string;
 }
