@@ -6,25 +6,30 @@ import {
   HttpStatus,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { MyInfoDto } from './dto/MyInfoDto';
 import { PatchMyInfoForm } from './dto/PatchMyInfoForm';
 import { PatchMyInfoResultDto } from './dto/PatchMyInfoResultDto';
 import { PatchMyNicknameForm } from './dto/PatchMyNicknameForm';
 import { PatchMyNicknameResult } from './dto/PatchMyNicknameResult';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Gender } from '../types/gender.enum';
 import { Mbti } from '../types/mbti.enum';
 import { ActivityTime } from '../types/activitytime.enum';
 import { Dorm } from '../types/dorm.enum';
 import { ageGroup } from '../types/ageGroup.enum';
+import { AwsService } from '../../upload/upload.service'; // AWS 서비스 import
+import { UUIDService } from '../uuid/uuid.service'; // UUID 생성 등을 위한 유틸 서비스 import
+import { Express } from 'express'; // Express 모듈 import
 
 @Injectable()
 export class MyContentService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly awsService: AwsService,
+    private readonly utilsService: UUIDService,
   ) {}
 
   // 사용자 정보 불러오기
@@ -48,9 +53,8 @@ export class MyContentService {
       const result = await this.userRepository.save(user);
       return { nickname: result.nickname };
     } catch (error) {
-      console.error('Error while changing nickname:', error); // 에러 로그 추가
+      console.error('Error while changing nickname:', error);
       if (error.code === '23505') {
-        // 고유 제약 조건 위반 (닉네임 중복)
         throw new HttpException(
           '이미 사용 중인 닉네임입니다.',
           HttpStatus.BAD_REQUEST,
@@ -80,9 +84,27 @@ export class MyContentService {
     }
   }
 
+  // 이미지 파일을 저장하는 메서드
+  async saveImage(file: Express.Multer.File) {
+    return await this.imageUpload(file);
+  }
+
+  // AWS S3에 이미지를 업로드하는 메서드
+  async imageUpload(file: Express.Multer.File) {
+    const imageName = this.utilsService.getUUID();
+    const ext = file.originalname.split('.').pop();
+
+    const imageUrl = await this.awsService.imageUploadToS3(
+      `${imageName}.${ext}`,
+      file,
+      ext,
+    );
+
+    return { imageUrl };
+  }
+
   // 사용자 데이터를 DTO에 맞게 변환하는 함수
   private convertUserData(user: User, form: PatchMyInfoForm): User {
-    // 성별 매핑
     const mapGender = (gender: string): Gender | undefined => {
       switch (gender) {
         case '남자':
@@ -105,7 +127,6 @@ export class MyContentService {
       );
     }
 
-    // MBTI 매핑
     const mapMbti = (mbti: string): Mbti | undefined => {
       const upperMbti = mbti.toUpperCase();
       if (Object.values(Mbti).includes(upperMbti as Mbti)) {
@@ -126,7 +147,6 @@ export class MyContentService {
       );
     }
 
-    // 활동 시간 매핑
     const mapActivityTime = (time: string): ActivityTime | undefined => {
       switch (time) {
         case '밤':
@@ -153,7 +173,6 @@ export class MyContentService {
       );
     }
 
-    // 기숙사 매핑
     const mapDorm = (dorm: string): Dorm | undefined => {
       if (Object.values(Dorm).includes(dorm as Dorm)) {
         return dorm as Dorm;
@@ -173,7 +192,6 @@ export class MyContentService {
       );
     }
 
-    // 연령대 매핑 추가
     const mapAgeGroup = (ageGroupStr: string): ageGroup | undefined => {
       switch (ageGroupStr) {
         case '20 ~ 22':
@@ -198,11 +216,8 @@ export class MyContentService {
       );
     }
 
-    // 나머지 필드 할당
     user.age = form.age;
     user.isSmoker = form.isSmoke;
-
-    // 태그와 상세 내용 할당
     user.tags = Array.from(new Set(form.favoriteTag || []));
     user.detail = form.myText || '';
 

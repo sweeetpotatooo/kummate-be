@@ -5,8 +5,11 @@ import {
   Body,
   Request,
   UseGuards,
+  UploadedFile,
+  UseInterceptors,
+  HttpCode,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation,ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { MyContentService } from './mycontents.service';
 import { MyInfoDto } from './dto/MyInfoDto';
 import { PatchMyInfoForm } from './dto/PatchMyInfoForm';
@@ -14,7 +17,11 @@ import { PatchMyNicknameForm } from './dto/PatchMyNicknameForm';
 import { JwtAccessTokenGuard } from '../../auth/guard/accessToken.guard'; // JWT 인증 Guard
 import { PatchMyNicknameResult } from './dto/PatchMyNicknameResult';
 import { PatchMyInfoResultDto } from './dto/PatchMyInfoResultDto';
-
+import { Express } from 'express'; // Express 모듈 임포트
+import { ImageUploadDto } from '../../upload/dto/image-upload.dto'; // 파일 업로드 DTO
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Multer } from 'multer'; // Multer의 타입을 명시적으로 불러옵니다.
+import { FileInterceptor } from '@nestjs/platform-express';
 @ApiTags('My Controller 내정보 API')
 @Controller('api/my')
 export class MyContentController {

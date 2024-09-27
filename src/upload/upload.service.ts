@@ -2,7 +2,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-
+import { Express } from 'express'; // Express 모듈 임포트
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import multer from 'multer'; // Multer 모듈 임포트
 @Injectable()
 export class AwsService {
   s3Client: S3Client;
