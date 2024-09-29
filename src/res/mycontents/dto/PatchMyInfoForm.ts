@@ -10,7 +10,6 @@ import {
 } from 'class-validator';
 
 export class PatchMyInfoForm {
-  @IsString()
   @IsOptional()
   gender?: string;
 
@@ -50,6 +49,7 @@ export class PatchMyInfoForm {
   @IsString()
   @IsOptional()
   myText?: string;
+  profileImage: string;
 
   static toDto(form: PatchMyInfoForm): PatchMyInfoRequestDto {
     const dto = new PatchMyInfoRequestDto();
