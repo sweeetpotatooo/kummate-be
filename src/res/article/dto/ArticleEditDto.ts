@@ -1,21 +1,23 @@
-import { IsString, IsNumber, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsEnum } from 'class-validator';
+import { ageGroup } from 'src/res/types/ageGroup.enum';
+import { Dorm } from 'src/res/types/dorm.enum';
 
 export class ArticleEditDto {
   @IsString()
   @IsOptional()
   title: string;
 
-  @IsString()
+  @IsEnum(Dorm)
   @IsOptional()
-  region: string;
+  region: Dorm;
 
-  @IsString()
+  @IsBoolean()
   @IsOptional()
-  smoke: string;
+  smoke: boolean;
 
-  @IsNumber()
+  @IsEnum(ageGroup)
   @IsOptional()
-  ageGroup: string;
+  ageGroup: ageGroup;
 
   @IsString()
   @IsOptional()
@@ -23,9 +25,9 @@ export class ArticleEditDto {
 
   constructor(
     title?: string,
-    region?: string,
-    smoke?: string,
-    ageGroup?: string,
+    region?: Dorm,
+    smoke?: boolean,
+    ageGroup?: ageGroup,
     content?: string,
   ) {
     this.title = title;

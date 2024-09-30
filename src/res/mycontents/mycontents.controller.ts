@@ -19,7 +19,8 @@ import { PatchMyNicknameResult } from './dto/PatchMyNicknameResult';
 import { PatchMyInfoResultDto } from './dto/PatchMyInfoResultDto';
 import { Express } from 'express'; // Express 모듈 임포트
 import { ImageUploadDto } from '../../upload/dto/image-upload.dto'; // 파일 업로드 DTO
-import { Multer } from 'multer'; // Multer의 타입을 명시적으로 불러옵니다.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Multer } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('My Controller 내정보 API')

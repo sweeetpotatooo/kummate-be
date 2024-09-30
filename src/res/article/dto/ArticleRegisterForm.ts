@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber } from 'class-validator';
+import { IsString, IsBoolean, IsEnum } from 'class-validator';
 import { ArticleRegisterDto } from './ArticleRegisterDto';
+import { ageGroup } from 'src/res/types/ageGroup.enum';
+import { Dorm } from 'src/res/types/dorm.enum';
 
 export class ArticleRegisterForm {
   @ApiProperty({ description: '제목', example: ' 룸메이트 구해요!' })
@@ -8,16 +10,16 @@ export class ArticleRegisterForm {
   title: string;
 
   @ApiProperty({ description: '기숙사', example: '모시래 4인실' })
-  @IsString()
-  region: string;
+  @IsEnum(Dorm)
+  region: Dorm;
 
   @ApiProperty({ description: '나이대', example: '20 ~ 22' })
-  @IsString()
-  ageGroup: string;
+  @IsEnum(ageGroup)
+  ageGroup: ageGroup;
 
   @ApiProperty({ description: '흡연 여부', example: '안해요' })
-  @IsNumber()
-  smoke: string;
+  @IsBoolean()
+  smoke: boolean;
 
   @ApiProperty({ description: '내용', example: '룸메이트 구해요 :)' })
   @IsString()
@@ -25,9 +27,9 @@ export class ArticleRegisterForm {
 
   constructor(
     title: string,
-    region: string,
-    ageGroup: string,
-    smoke: string,
+    region: Dorm,
+    ageGroup: ageGroup,
+    smoke: boolean,
     content: string,
   ) {
     this.title = title;

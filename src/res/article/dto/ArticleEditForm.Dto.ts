@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsBoolean } from 'class-validator';
 import { ArticleEditDto } from './ArticleEditDto';
+import { Dorm } from 'src/res/types/dorm.enum';
+import { ageGroup } from 'src/res/types/ageGroup.enum';
 
 export class ArticleEditForm {
   @ApiProperty({ description: '제목', example: '같이 방쓸 컴공 선배님 구해요' })
@@ -9,19 +11,19 @@ export class ArticleEditForm {
   title: string;
 
   @ApiProperty({ description: '기숙사', example: '모시래 4인실' })
-  @IsString()
+  @IsEnum(Dorm)
   @IsOptional()
-  region: string;
+  region: Dorm;
 
   @ApiProperty({ description: '나이대', example: '20 ~ 22' })
-  @IsString()
+  @IsEnum(ageGroup)
   @IsOptional()
-  ageGroup: string;
+  ageGroup: ageGroup;
 
   @ApiProperty({ description: '흡연여부', example: '안해요' })
-  @IsNumber()
+  @IsBoolean()
   @IsOptional()
-  smoke: string;
+  smoke: boolean;
 
   @ApiProperty({
     description: '내용',
@@ -33,9 +35,9 @@ export class ArticleEditForm {
 
   constructor(
     title?: string,
-    region?: string,
-    ageGroup?: string,
-    smoke?: string,
+    region?: Dorm,
+    ageGroup?: ageGroup,
+    smoke?: boolean,
     content?: string,
   ) {
     this.title = title;

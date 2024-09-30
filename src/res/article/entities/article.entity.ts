@@ -38,9 +38,6 @@ export class Article extends BaseEntity {
   })
   ageGroup: ageGroup;
 
-  @Column({ type: 'int' })
-  price: number;
-
   @Column({
     type: 'enum',
     enum: Gender,
