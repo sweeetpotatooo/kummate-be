@@ -20,20 +20,25 @@ export class ArticlesService {
   ) {}
 
   // 게시글 작성
+  // 게시글 작성
   async postArticle(user: User, dto: ArticleRegisterDto): Promise<void> {
     if (
       !dto.title ||
       !dto.content ||
       !dto.region ||
       !dto.ageGroup ||
-      !dto.smoke
+      dto.smoke == null
     ) {
       throw new BadRequestException('유효하지 않은 게시글입니다.');
     }
 
     // 사용자당 최대 게시글 수 제한 (예: 5개)
     const userArticleCount = await this.articleRepository.count({
-      where: { user: user, isDeleted: false, isRecruiting: true },
+      where: {
+        user: { user_id: user.user_id },
+        isDeleted: false,
+        isRecruiting: true,
+      },
     });
 
     if (userArticleCount >= 5) {
@@ -53,7 +58,7 @@ export class ArticlesService {
   // 게시글 가져오기
   async getArticle(id: number): Promise<ArticlePageDto> {
     const article = await this.articleRepository.findOne({
-      where: { id: id, isDeleted: false },
+      where: { article_id: id, isDeleted: false },
       relations: ['user'],
     });
 
@@ -76,7 +81,7 @@ export class ArticlesService {
   // 게시글 수정
   async putArticle(user: User, id: number, dto: ArticleEditDto): Promise<void> {
     const article = await this.articleRepository.findOne({
-      where: { id: id },
+      where: { article_id: id },
       relations: ['user'],
     });
 
@@ -109,7 +114,7 @@ export class ArticlesService {
   // 게시글 삭제
   async deleteArticle(user: User, id: number): Promise<void> {
     const article = await this.articleRepository.findOne({
-      where: { id: id },
+      where: { article_id: id },
       relations: ['user'],
     });
 

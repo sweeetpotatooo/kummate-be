@@ -1,17 +1,20 @@
-// src/dto/patch-my-info-request.dto.ts
-
 import {
   IsBoolean,
   IsInt,
   IsOptional,
   IsString,
   IsArray,
+  IsEnum,
 } from 'class-validator';
+import { Gender } from 'src/res/types/gender.enum';
+import { ActivityTime } from 'src/res/types/activitytime.enum';
+import { ageGroup } from 'src/res/types/ageGroup.enum';
+import { Dorm } from 'src/res/types/dorm.enum';
 
 export class PatchMyInfoRequestDto {
-  @IsString()
+  @IsEnum(Gender)
   @IsOptional()
-  gender?: string;
+  gender?: Gender;
 
   @IsInt()
   @IsOptional()
@@ -21,17 +24,17 @@ export class PatchMyInfoRequestDto {
   @IsOptional()
   isSmoke?: boolean;
 
-  @IsString()
+  @IsEnum(Dorm)
   @IsOptional()
-  mbti?: string;
+  dorm?: Dorm;
 
-  @IsString()
+  @IsEnum(ActivityTime)
   @IsOptional()
-  region?: string;
+  activityTime?: ActivityTime;
 
-  @IsString()
+  @IsEnum(ageGroup)
   @IsOptional()
-  activityTime?: string;
+  ageGroup?: ageGroup;
 
   @IsArray()
   @IsString({ each: true })
@@ -44,9 +47,5 @@ export class PatchMyInfoRequestDto {
 
   @IsString()
   @IsOptional()
-  dorm?: string;
-
-  @IsString()
-  @IsOptional()
-  ageGroup?: string;
+  region?: string;
 }

@@ -14,6 +14,6 @@ export class ArticleInfoDto {
   }
 
   static toDto(article: Article): ArticleInfoDto {
-    return new ArticleInfoDto(article.id, article.title);
+    return new ArticleInfoDto(article.article_id, article.title);
   }
 }

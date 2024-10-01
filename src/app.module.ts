@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmModuleOptions } from './config/typeorm.config';
 import { MycontentsModule } from './res/mycontents/mycontents.module';
 import { AwsModule } from './upload/upload.module';
+import { ArticlesModule } from './res/article/article.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AwsModule } from './upload/upload.module';
     }),
     UserModule,
     AuthModule,
+    ArticlesModule,
     MycontentsModule,
     TypeOrmModule.forRoot(typeOrmModuleOptions),
     AwsModule,

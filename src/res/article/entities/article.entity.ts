@@ -4,17 +4,19 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Gender } from '../../types/gender.enum';
 import { ageGroup } from '../../types/ageGroup.enum';
 import { Dorm } from '../../types/dorm.enum';
 import { BaseEntity } from 'src/res/entities/Base.entity';
+import { Apply } from 'src/res/apply/entities/apply.entity';
 
 @Entity()
 export class Article extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: number;
+  article_id: number;
 
   @ManyToOne(() => User, (user) => user.articles, { nullable: false })
   @JoinColumn({ name: 'user_id' })
@@ -52,4 +54,7 @@ export class Article extends BaseEntity {
 
   @Column({ type: 'boolean', default: false })
   isDeleted: boolean;
+
+  @OneToMany(() => Apply, (apply) => apply.article)
+  applies: Apply[];
 }

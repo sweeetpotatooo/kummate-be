@@ -1,5 +1,3 @@
-// src/dto/patch-my-info-form.dto.ts
-
 import {
   IsBoolean,
   IsInt,
@@ -11,6 +9,7 @@ import {
 
 export class PatchMyInfoForm {
   @IsOptional()
+  @IsString()
   gender?: string;
 
   @IsInt()
@@ -49,7 +48,10 @@ export class PatchMyInfoForm {
   @IsString()
   @IsOptional()
   myText?: string;
-  profileImage: string;
+
+  @IsString()
+  @IsOptional()
+  profileImage?: string; // 유효성 검사 추가
 
   static toDto(form: PatchMyInfoForm): PatchMyInfoRequestDto {
     const dto = new PatchMyInfoRequestDto();
@@ -63,6 +65,7 @@ export class PatchMyInfoForm {
     dto.dorm = form.dorm;
     dto.detail = form.myText;
     dto.ageGroup = form.ageGroup;
+    dto.profileImage = form.profileImage; // 추가
     return dto;
   }
 }
@@ -104,5 +107,11 @@ export class PatchMyInfoRequestDto {
   @IsString()
   @IsOptional()
   detail?: string;
+
+  @IsString()
+  @IsOptional()
+  profileImage?: string; // 유효성 검사 추가
+
+  @IsString()
   ageGroup: string;
 }

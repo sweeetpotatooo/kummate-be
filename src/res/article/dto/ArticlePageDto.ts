@@ -81,7 +81,7 @@ export class ArticlePageDto {
 
   static toDto(article: Article): ArticlePageDto {
     return new ArticlePageDto(
-      article.id,
+      article.article_id,
       article.title,
       article.user.email,
       article.user.image,
