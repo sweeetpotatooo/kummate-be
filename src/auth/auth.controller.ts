@@ -54,5 +54,3 @@ export class AuthController {
     return result;
   }
 }
-//user 엔티티에 atk,rtk
-// 프로필 연동

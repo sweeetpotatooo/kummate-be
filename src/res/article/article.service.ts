@@ -11,17 +11,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { ArticleInfoDto } from './dto/ArticleInfoDto';
 import { ArticlePageDto } from './dto/ArticlePageDto';
-
+import { UserService } from '../user/user.service';
 @Injectable()
 export class ArticlesService {
   constructor(
     @InjectRepository(Article)
     private readonly articleRepository: Repository<Article>,
+    private readonly userService: UserService,
   ) {}
 
-  // 게시글 작성
-  // 게시글 작성
-  async postArticle(user: User, dto: ArticleRegisterDto): Promise<void> {
+  async postArticle(user_id: number, dto: ArticleRegisterDto): Promise<void> {
     if (
       !dto.title ||
       !dto.content ||
@@ -30,6 +29,11 @@ export class ArticlesService {
       dto.smoke == null
     ) {
       throw new BadRequestException('유효하지 않은 게시글입니다.');
+    }
+    // 사용자 조회 (여기서 user 변수를 선언하고 초기화)
+    const user = await this.userService.findById(user_id);
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
     }
 
     // 사용자당 최대 게시글 수 제한 (예: 5개)
@@ -47,7 +51,7 @@ export class ArticlesService {
 
     const article = this.articleRepository.create({
       ...dto,
-      user: user,
+      user: user, // User 엔티티 할당
       isRecruiting: true,
       isDeleted: false,
     });
@@ -67,6 +71,38 @@ export class ArticlesService {
     }
 
     return ArticlePageDto.toDto(article);
+  }
+
+  // src/articles/article.service.ts
+  async getAllArticles(
+    query,
+  ): Promise<{ articles: ArticleInfoDto[]; totalCnt: number }> {
+    const { page = 1, size = 10, isRecruiting } = query;
+
+    const queryBuilder = this.articleRepository
+      .createQueryBuilder('article')
+      .leftJoinAndSelect('article.user', 'user')
+      .where('article.isDeleted = :isDeleted', { isDeleted: false });
+
+    if (isRecruiting !== undefined) {
+      queryBuilder.andWhere('article.isRecruiting = :isRecruiting', {
+        isRecruiting: isRecruiting === 'true',
+      });
+    }
+
+    const pageNumber = parseInt(page as string, 10) || 1;
+    const pageSize = parseInt(size as string, 10) || 10;
+
+    const [articles, totalCnt] = await queryBuilder
+      .orderBy('article.createdAt', 'DESC')
+      .skip((pageNumber - 1) * pageSize)
+      .take(pageSize)
+      .getManyAndCount();
+
+    return {
+      articles: articles.map((article) => ArticleInfoDto.toDto(article)),
+      totalCnt,
+    };
   }
 
   // 작성자 작성글 보기
@@ -109,6 +145,60 @@ export class ArticlesService {
     if (dto.smoke) article.smoke = dto.smoke;
 
     await this.articleRepository.save(article);
+  }
+
+  async filterArticles(
+    query,
+  ): Promise<{ articles: ArticleInfoDto[]; totalCnt: number }> {
+    const {
+      region,
+      ageGroup,
+      smoke,
+      gender,
+      page = 1, // 기본값을 1로 설정
+      size = 10, // 기본값을 10으로 설정
+      isRecruiting,
+    } = query;
+
+    const queryBuilder = this.articleRepository
+      .createQueryBuilder('article')
+      .leftJoinAndSelect('article.user', 'user')
+      .where('article.isDeleted = :isDeleted', { isDeleted: false });
+
+    if (region) {
+      queryBuilder.andWhere('article.region = :region', { region });
+    }
+    if (ageGroup) {
+      queryBuilder.andWhere('article.ageGroup = :ageGroup', { ageGroup });
+    }
+    if (smoke !== undefined) {
+      queryBuilder.andWhere('article.smoke = :smoke', {
+        smoke: smoke === 'true',
+      });
+    }
+    if (gender) {
+      queryBuilder.andWhere('user.gender = :gender', { gender });
+    }
+    if (isRecruiting !== undefined) {
+      queryBuilder.andWhere('article.isRecruiting = :isRecruiting', {
+        isRecruiting: isRecruiting === 'true',
+      });
+    }
+
+    // 여기서 page와 size를 숫자로 변환
+    const pageNumber = parseInt(page as string, 10) || 1; // 기본값 1
+    const pageSize = parseInt(size as string, 10) || 10; // 기본값 10
+
+    const [articles, totalCnt] = await queryBuilder
+      .orderBy('article.createdAt', 'DESC') // 최신순 정렬
+      .skip((pageNumber - 1) * pageSize) // 페이지네이션 처리를 위해 skip
+      .take(pageSize) // 한 페이지에 보여줄 게시글 수
+      .getManyAndCount();
+
+    return {
+      articles: articles.map((article) => ArticleInfoDto.toDto(article)),
+      totalCnt,
+    };
   }
 
   // 게시글 삭제

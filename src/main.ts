@@ -6,13 +6,13 @@ declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
   // CORS 설정
   app.enableCors({
     origin: 'http://localhost:5173', // 리액트 애플리케이션이 동작하는 주소
     credentials: true,
   });
-
+  // main.ts
+  app.enableCors();
   // Swagger 설정
   const config = new DocumentBuilder()
     .setTitle('API Documentation')

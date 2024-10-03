@@ -15,37 +15,83 @@ import axios from 'axios'; // HTTP 요청을 위한 Axios 라이브러리
 export class UserService {
   constructor(
     @InjectRepository(User) // TypeORM의 유저 레포지토리를 주입받음
-    private usersRepository: Repository<User>, // 유저와 관련된 데이터베이스 작업을 처리하는 레포지토리
+    private readonly usersRepository: Repository<User>, // 유저와 관련된 데이터베이스 작업을 처리하는 레포지토리
   ) {}
 
   // 이메일로 인증번호를 전송하는 메서드
   async sendVerificationCode(email: string): Promise<void> {
-    console.log('Sending verification code to:', email); // 로그: 인증번호 전송 시작
-    const response = await axios.post('https://univcert.com/api/v1/certify', {
-      email, // 이메일을 전달하여 외부 API로 인증 요청
-    });
-    console.log('Verification code sent response:', response.data); // 로그: 인증번호 전송 결과 출력
-    if (response.status !== 200) {
-      // 만약 HTTP 응답 상태가 200이 아니라면
-      console.log('Failed to send verification code'); // 로그: 전송 실패 메시지
-      throw new BadRequestException('인증번호 전송에 실패했습니다.'); // 예외 발생: 인증번호 전송 실패
+    console.log('Sending verification code to:', email);
+
+    // API에 보낼 데이터
+    const data = {
+      key: 'd24b515a-1804-4fd5-8ac0-f48c07cc472a', // 고정된 키 값
+      email: email, // 프론트에서 받아온 이메일 값
+      univName: '건국대학교(글로컬)', // 고정된 대학명
+      univ_check: true, // 대학 재학 여부 확인을 위해 true
+    };
+
+    try {
+      const response = await axios.post(
+        'https://univcert.com/api/v1/certify',
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      console.log('Verification code sent response:', response.data);
+
+      if (response.status !== 200) {
+        console.log('Failed to send verification code');
+        throw new BadRequestException('인증번호 전송에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error(
+        'Failed to send verification code:',
+        error.response?.data || error.message,
+      );
+      throw new BadRequestException('인증번호 전송에 실패했습니다.');
     }
   }
-
   // 사용자가 입력한 인증번호를 검증하는 메서드
   async verifyCode(email: string, code: string): Promise<boolean> {
-    console.log('Verifying code for email:', email, 'with code:', code); // 로그: 인증번호 검증 시작
-    const response = await axios.post(
-      'https://univcert.com/api/v1/certifycode',
-      { email, code }, // 이메일과 코드로 외부 API에 검증 요청
-    );
-    console.log('Verification code check response:', response.data); // 로그: 검증 결과 출력
-    if (!response.data.success) {
-      // 인증 실패 시
-      console.log('Failed to verify code'); // 로그: 인증 실패 메시지
-      throw new BadRequestException('인증코드 검증에 실패했습니다.'); // 예외 발생: 인증 실패
+    console.log('Verifying code for email:', email, 'with code:', code);
+
+    const data = {
+      key: 'd24b515a-1804-4fd5-8ac0-f48c07cc472a',
+      email: email,
+      univName: '건국대학교(글로컬)',
+      code: code,
+    };
+
+    try {
+      const response = await axios.post(
+        'https://univcert.com/api/v1/certifycode',
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      console.log('Verification code check response:', response.data);
+
+      if (!response.data.success) {
+        console.log('Failed to verify code');
+        throw new BadRequestException('인증코드 검증에 실패했습니다.');
+      }
+
+      return true;
+    } catch (error) {
+      console.error(
+        'Failed to verify code:',
+        error.response?.data || error.message,
+      );
+      throw new BadRequestException('인증코드 검증에 실패했습니다.');
     }
-    return true; // 성공적으로 검증되면 true 반환
   }
 
   // 이메일 인증 상태를 확인하는 메서드
@@ -119,13 +165,8 @@ export class UserService {
   }
 
   // 특정 ID로 유저를 조회하는 메서드
-  async findOne(user_id: number): Promise<User | null> {
-    console.log('Finding user with ID:', user_id); // 로그: 유저 조회 시작
-    const user = await this.usersRepository.findOne({
-      where: { user_id }, // 주어진 ID로 유저를 검색
-    });
-    console.log('User found:', user); // 로그: 유저 정보 출력
-    return user || null; // 유저가 있으면 반환, 없으면 null 반환
+  async findById(userId: number): Promise<User> {
+    return this.usersRepository.findOne({ where: { user_id: userId } });
   }
 
   // 사용자 메인 페이지를 반환하는 메서드 (예시)

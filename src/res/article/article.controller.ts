@@ -8,13 +8,13 @@ import {
   Body,
   ParseIntPipe,
   UseGuards,
+  Query,
+  Req,
 } from '@nestjs/common';
 import { ArticlesService } from './article.service';
 import { ArticleRegisterForm } from './dto/ArticleRegisterForm';
 import { ArticleEditForm } from './dto/ArticleEditForm.Dto';
 import { JwtAccessTokenGuard } from '../../auth/guard/accessToken.guard';
-
-import { User } from '../../auth/user.decorator';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Article Controller 게시물 API')
@@ -25,12 +25,35 @@ export class ArticlesController {
   @ApiOperation({ summary: '게시물 작성', description: '게시물을 작성합니다.' })
   @UseGuards(JwtAccessTokenGuard)
   @Post()
-  async postArticle(@User() user, @Body() form: ArticleRegisterForm) {
+  async postArticle(@Req() req, @Body() form: ArticleRegisterForm) {
+    const user = req.user; // 요청 객체에서 user 정보 추출
+
+    console.log('User:', user); // user 정보 확인용 로그
+
     await this.articlesService.postArticle(
-      user,
+      user.user_id,
       ArticleRegisterForm.toDto(form),
     );
     return { code: 201, message: '게시글이 생성되었습니다.' };
+  }
+  @ApiOperation({
+    summary: '게시물 필터링',
+    description: '검색 조건에 따라 게시물을 필터링하여 가져옵니다.',
+  })
+  @Get('filter')
+  async filterArticles(@Query() query) {
+    const result = await this.articlesService.filterArticles(query);
+    return { code: 200, data: result };
+  }
+  @ApiOperation({
+    summary: '모든 게시물 가져오기',
+    description: '모든 게시물을 가져옵니다.',
+  })
+  // src/articles/article.controller.ts
+  @Get()
+  async getAllArticles(@Query() query) {
+    const result = await this.articlesService.getAllArticles(query);
+    return { code: 200, data: result };
   }
 
   @ApiOperation({
@@ -60,15 +83,11 @@ export class ArticlesController {
   @UseGuards(JwtAccessTokenGuard)
   @Put(':id')
   async putArticle(
-    @User() user,
+    @Req() req,
     @Param('id', ParseIntPipe) id: number,
     @Body() form: ArticleEditForm,
   ) {
-    await this.articlesService.putArticle(
-      user,
-      id,
-      ArticleEditForm.toDto(form),
-    );
+    await this.articlesService.putArticle(req, id, ArticleEditForm.toDto(form));
     return { code: 200, message: '게시글이 수정되었습니다.' };
   }
 
@@ -78,8 +97,8 @@ export class ArticlesController {
   })
   @UseGuards(JwtAccessTokenGuard)
   @Delete(':id')
-  async deleteArticle(@User() user, @Param('id', ParseIntPipe) id: number) {
-    await this.articlesService.deleteArticle(user, id);
+  async deleteArticle(@Req() req, @Param('id', ParseIntPipe) id: number) {
+    await this.articlesService.deleteArticle(req, id);
     return { code: 200, message: '게시글이 삭제되었습니다.' };
   }
 }
