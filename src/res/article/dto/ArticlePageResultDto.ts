@@ -1,3 +1,4 @@
+// src/res/article/dto/ArticlePageResultDto.ts
 import { ApiProperty } from '@nestjs/swagger';
 import { ArticlePageDto } from './ArticlePageDto';
 import { Article } from '../entities/article.entity';
@@ -7,16 +8,16 @@ export class ArticlePageResultDto {
   totalCnt: number;
 
   @ApiProperty({ type: [ArticlePageDto], description: '게시물 리스트' })
-  articleList: ArticlePageDto[];
+  articles: ArticlePageDto[]; // 'articleList'를 'articles'로 변경
 
-  constructor(totalCnt: number, articleList: ArticlePageDto[]) {
+  constructor(totalCnt: number, articles: ArticlePageDto[]) {
     this.totalCnt = totalCnt;
-    this.articleList = articleList;
+    this.articles = articles;
   }
 
   static toDto(articlePage: {
-    totalCnt: number;
     articles: Article[];
+    totalCnt: number;
   }): ArticlePageResultDto {
     return new ArticlePageResultDto(
       articlePage.totalCnt,

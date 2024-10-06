@@ -1,3 +1,4 @@
+//src/res/article/entities/article.entity.ts
 import {
   Entity,
   Column,
@@ -12,6 +13,7 @@ import { ageGroup } from '../../types/ageGroup.enum';
 import { Dorm } from '../../types/dorm.enum';
 import { BaseEntity } from 'src/res/entities/Base.entity';
 import { Apply } from 'src/res/apply/entities/apply.entity';
+import { Favorite } from 'src/res/favorite/entities/favorite.entity';
 
 @Entity()
 export class Article extends BaseEntity {
@@ -57,4 +59,7 @@ export class Article extends BaseEntity {
 
   @OneToMany(() => Apply, (apply) => apply.article)
   applies: Apply[];
+
+  @OneToMany(() => Favorite, (favorite) => favorite.article)
+  favorites: Favorite[];
 }

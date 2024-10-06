@@ -12,5 +12,4 @@ export const AppDataSource = new DataSource({
   synchronize: false, // true면 자동으로 데이터베이스와 엔티티를 동기화 (운영 환경에서는 false 권장)
   logging: true, // 쿼리 로깅 여부
   entities: [User, Article], // 엔티티 목록
-  migrations: ['src/migrations/*.ts'], // 마이그레이션 파일 경로를 직접 지정
 });

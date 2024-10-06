@@ -35,6 +35,7 @@ export class MyContentService {
       // AWS S3에 이미지를 업로드하는 로직
       const imageName = `uploads/${Date.now()}_${file.originalname}`;
       const ext = file.originalname.split('.').pop(); // 파일 확장자를 추출
+      console.log(`Uploading image: ${imageName}`); // 업로드할 이미지 이름 로그
       const imageUrl = await this.awsService.imageUploadToS3(
         imageName,
         file,
@@ -53,7 +54,7 @@ export class MyContentService {
   // 사용자 정보 불러오기
   async getMyInfo(userPayload: any): Promise<MyInfoDto> {
     const user = await this.userRepository.findOne({
-      where: { user_id: userPayload.userId },
+      where: { user_id: userPayload.id }, // 올바른 참조
     });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -62,17 +63,30 @@ export class MyContentService {
   }
 
   // 닉네임 변경
+
   async patchNickname(
-    user: User,
+    userPayload: any,
     form: PatchMyNicknameForm,
   ): Promise<PatchMyNicknameResult> {
+    // userPayload에서 id를 추출하여 사용자 조회
+    const user = await this.userRepository.findOne({
+      where: { user_id: userPayload.id },
+    });
+
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    // 닉네임 변경
     user.nickname = form.nickname;
+
     try {
       const result = await this.userRepository.save(user);
       return { nickname: result.nickname };
     } catch (error) {
-      console.error('Error while changing nickname:', error);
+      console.error('닉네임 변경 중 오류 발생:', error);
       if (error.code === '23505') {
+        // PostgreSQL의 경우 고유 제약 조건 위반 코드
         throw new HttpException(
           '이미 사용 중인 닉네임입니다.',
           HttpStatus.BAD_REQUEST,
@@ -84,16 +98,17 @@ export class MyContentService {
       );
     }
   }
-
+  async updateProfileImage(userId: number, imageUrl: string): Promise<void> {
+    await this.userRepository.update(userId, { image: imageUrl });
+  }
   // 사용자 정보 수정
   async patchMyInfo(
-    userPayload: any, // 요청에서 `userPayload`를 받는다고 가정
+    userPayload: any,
     form: PatchMyInfoForm,
   ): Promise<PatchMyInfoResultDto> {
     try {
-      // user_id를 Payload에서 추출
       let user = await this.userRepository.findOne({
-        where: { user_id: userPayload.userId }, // Access Token에서 추출한 user_id
+        where: { user_id: userPayload.id }, // 올바른 참조
       });
 
       if (!user) {

@@ -1,3 +1,4 @@
+//src/res/user/entities/user.entity.ts
 import {
   Entity,
   Column,
@@ -17,6 +18,7 @@ import { BaseEntity } from 'src/res/entities/Base.entity';
 import { Article } from 'src/res/article/entities/article.entity';
 import { ageGroup } from 'src/res/types/ageGroup.enum';
 import { Apply } from 'src/res/apply/entities/apply.entity';
+import { Favorite } from 'src/res/favorite/entities/favorite.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -85,6 +87,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Apply, (apply) => apply.applicantUser)
   applies: Apply[];
+
+  @OneToMany(() => Favorite, (favorite) => favorite.user)
+  favorites: Favorite[];
 
   // 액세스 토큰과 리프레시 토큰을 추가
   @Column({ nullable: true })

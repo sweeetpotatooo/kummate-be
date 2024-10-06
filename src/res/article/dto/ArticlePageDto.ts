@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsBoolean, IsDate } from 'class-validator';
-import { Article } from '../entities/article.entity'; // Article 엔티티 경로를 맞게 수정
+import { IsString, IsNumber, IsBoolean } from 'class-validator';
+import { Article } from '../entities/article.entity';
 
 export class ArticlePageDto {
   @ApiProperty({ description: 'ID' })
@@ -32,8 +32,8 @@ export class ArticlePageDto {
   gender: string;
 
   @ApiProperty({ description: '생성일자' })
-  @IsDate()
-  createdDate: Date;
+  @IsString()
+  createDate: string; // Date를 string으로 변환
 
   @ApiProperty({ description: '기숙사' })
   @IsString()
@@ -44,7 +44,7 @@ export class ArticlePageDto {
   ageGroup: string;
 
   @ApiProperty({ description: '흡연여부' })
-  @IsNumber()
+  @IsBoolean()
   smoke: boolean;
 
   @ApiProperty({ description: '모집 중 여부' })
@@ -59,7 +59,7 @@ export class ArticlePageDto {
     nickname: string,
     content: string,
     gender: string,
-    createdDate: Date,
+    createDate: string,
     region: string,
     ageGroup: string,
     smoke: boolean,
@@ -72,7 +72,7 @@ export class ArticlePageDto {
     this.nickname = nickname;
     this.content = content;
     this.gender = gender;
-    this.createdDate = createdDate;
+    this.createDate = createDate;
     this.region = region;
     this.ageGroup = ageGroup;
     this.smoke = smoke;
@@ -88,7 +88,7 @@ export class ArticlePageDto {
       article.user.nickname,
       article.content,
       article.user.gender,
-      article.createDate,
+      article.createDate.toISOString(), // Date를 string으로 변환
       article.region,
       article.ageGroup,
       article.smoke,

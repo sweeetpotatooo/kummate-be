@@ -1,3 +1,4 @@
+// src/res/mycontents/mycontents.controller.ts
 import {
   Controller,
   Get,
@@ -8,27 +9,35 @@ import {
   UploadedFile,
   UseInterceptors,
   HttpCode,
+  Query,
+  Post,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { MyContentService } from './mycontents.service';
 import { MyInfoDto } from './dto/MyInfoDto';
 import { PatchMyInfoForm } from './dto/PatchMyInfoForm';
 import { PatchMyNicknameForm } from './dto/PatchMyNicknameForm';
-import { JwtAccessTokenGuard } from '../../auth/guard/accessToken.guard'; // JWT 인증 Guard
+import { JwtAccessTokenGuard } from '../../auth/guard/accessToken.guard';
 import { PatchMyNicknameResult } from './dto/PatchMyNicknameResult';
 import { PatchMyInfoResultDto } from './dto/PatchMyInfoResultDto';
-import { Express } from 'express'; // Express 모듈 임포트
-import { ImageUploadDto } from '../../upload/dto/image-upload.dto'; // 파일 업로드 DTO
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Multer } from 'multer';
+import { Express } from 'express';
+import { ImageUploadDto } from '../../upload/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ArticlesService } from '../article/article.service';
+import { ArticlePageDto } from '../article/dto/ArticlePageDto';
+import { QueryFailedError } from 'typeorm';
 
 @ApiTags('My Controller 내정보 API')
 @Controller('api/my')
 export class MyContentController {
-  constructor(private readonly myContentService: MyContentService) {}
+  constructor(
+    private readonly myContentService: MyContentService,
+    private readonly articlesService: ArticlesService, // ArticlesService 주입
+  ) {}
 
-  @UseGuards(JwtAccessTokenGuard) // JWT 인증 적용
+  @UseGuards(JwtAccessTokenGuard)
   @ApiOperation({
     summary: '내정보 불러오기',
     description: '로그인 정보(토큰)를 바탕으로 자신의 정보를 가져옵니다.',
@@ -45,12 +54,39 @@ export class MyContentController {
     description: '로그인 정보(토큰)를 이용해 닉네임을 변경합니다.',
   })
   @Patch('nickname')
-  patchMyNickName(
+  async patchMyNickName(
     @Request() req,
     @Body() form: PatchMyNicknameForm,
   ): Promise<PatchMyNicknameResult> {
+    const userPayload = req.user;
+    return this.myContentService.patchNickname(userPayload, form);
+  }
+
+  @UseGuards(JwtAccessTokenGuard)
+  @ApiOperation({
+    summary: '내 게시글 불러오기',
+    description: '로그인 정보(토큰)를 바탕으로 자신의 게시글을 가져옵니다.',
+  })
+  @Get('articles')
+  async getMyArticles(
+    @Request() req,
+    @Query('page') page: string,
+    @Query('size') size: string,
+  ): Promise<{ articles: ArticlePageDto[]; totalCnt: number }> {
     const user = req.user;
-    return this.myContentService.patchNickname(user, form);
+    const pageNumber = parseInt(page, 10) || 1;
+    const pageSize = parseInt(size, 10) || 10;
+
+    const result = await this.articlesService.getUserArticles(
+      user.id, // 수정된 부분
+      pageNumber,
+      pageSize,
+    );
+
+    return {
+      articles: result.articles,
+      totalCnt: result.totalCnt,
+    };
   }
 
   @UseGuards(JwtAccessTokenGuard)
@@ -77,9 +113,9 @@ export class MyContentController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: '업로드할 파일',
-    type: ImageUploadDto, // DTO를 사용하여 Swagger에서 파일 업로드 설명
+    type: ImageUploadDto,
   })
-  @UseInterceptors(FileInterceptor('file')) // Multer를 사용하여 파일 업로드 처리
+  @UseInterceptors(FileInterceptor('file'))
   @HttpCode(200)
   @Patch('image')
   async patchMyInfoWithImage(
@@ -96,5 +132,52 @@ export class MyContentController {
     form.profileImage = uploadResult.imageUrl;
 
     return this.myContentService.patchMyInfo(user, form);
+  }
+  @UseGuards(JwtAccessTokenGuard)
+  @ApiOperation({
+    summary: '프로필 이미지 업로드',
+    description: '로그인 정보(토큰)를 통해 프로필 이미지를 업로드합니다.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: '업로드할 파일',
+    type: ImageUploadDto,
+  })
+  @UseInterceptors(FileInterceptor('file')) // 'file' 필드로 파일 받기
+  @HttpCode(200)
+  @Post('image/upload')
+  async uploadProfileImage(
+    @Request() req,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<{ imageUrl: string }> {
+    try {
+      console.log('Received file:', file); // 파일 정보 로그 추가
+      const userPayload = req.user;
+
+      const uploadResult = await this.myContentService.saveImage(file);
+
+      // 사용자 프로필 이미지 업데이트
+      await this.myContentService.updateProfileImage(
+        userPayload.id,
+        uploadResult.imageUrl,
+      );
+
+      return { imageUrl: uploadResult.imageUrl };
+    } catch (error) {
+      console.error('Error in uploadProfileImage:', error);
+      if (
+        error instanceof QueryFailedError &&
+        error.message.includes('ER_DATA_TOO_LONG')
+      ) {
+        throw new HttpException(
+          '프로필 이미지 URL이 너무 깁니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      throw new HttpException(
+        '프로필 이미지 업로드 실패',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

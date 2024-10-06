@@ -9,7 +9,6 @@ import { Article } from './entities/article.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
-import { ArticleInfoDto } from './dto/ArticleInfoDto';
 import { ArticlePageDto } from './dto/ArticlePageDto';
 import { UserService } from '../user/user.service';
 @Injectable()
@@ -73,11 +72,16 @@ export class ArticlesService {
     return ArticlePageDto.toDto(article);
   }
 
-  // src/articles/article.service.ts
   async getAllArticles(
     query,
-  ): Promise<{ articles: ArticleInfoDto[]; totalCnt: number }> {
+  ): Promise<{ articles: ArticlePageDto[]; totalCnt: number }> {
+    console.log('Received query parameters:', query);
+
     const { page = 1, size = 10, isRecruiting } = query;
+
+    console.log('Original isRecruiting:', isRecruiting);
+    const isRecruitingBool = isRecruiting === 'true';
+    console.log('Converted isRecruiting:', isRecruitingBool);
 
     const queryBuilder = this.articleRepository
       .createQueryBuilder('article')
@@ -86,32 +90,62 @@ export class ArticlesService {
 
     if (isRecruiting !== undefined) {
       queryBuilder.andWhere('article.isRecruiting = :isRecruiting', {
-        isRecruiting: isRecruiting === 'true',
+        isRecruiting: isRecruitingBool,
       });
     }
 
     const pageNumber = parseInt(page as string, 10) || 1;
     const pageSize = parseInt(size as string, 10) || 10;
 
-    const [articles, totalCnt] = await queryBuilder
-      .orderBy('article.createdAt', 'DESC')
-      .skip((pageNumber - 1) * pageSize)
-      .take(pageSize)
-      .getManyAndCount();
+    console.log(
+      'Building query with orderBy createDate DESC, skip:',
+      (pageNumber - 1) * pageSize,
+      'take:',
+      pageSize,
+    );
 
-    return {
-      articles: articles.map((article) => ArticleInfoDto.toDto(article)),
-      totalCnt,
-    };
+    try {
+      const [articles, totalCnt] = await queryBuilder
+        .orderBy('article.createDate', 'DESC') // 'createDate'로 수정
+        .skip((pageNumber - 1) * pageSize)
+        .take(pageSize)
+        .getManyAndCount();
+
+      console.log('Fetched articles:', articles);
+      console.log('Total count:', totalCnt);
+
+      return {
+        articles: articles.map((article) => ArticlePageDto.toDto(article)), // ArticlePageDto 사용
+        totalCnt,
+      };
+    } catch (error) {
+      console.error('Error fetching articles:', error);
+      throw error;
+    }
   }
 
   // 작성자 작성글 보기
-  async getUserArticles(userId: number): Promise<ArticleInfoDto[]> {
-    const articles = await this.articleRepository.find({
-      where: { user: { user_id: userId }, isDeleted: false },
-    });
+  async getUserArticles(
+    userId: number,
+    page: number = 1,
+    size: number = 10,
+  ): Promise<{ articles: ArticlePageDto[]; totalCnt: number }> {
+    const queryBuilder = this.articleRepository
+      .createQueryBuilder('article')
+      .leftJoinAndSelect('article.user', 'user')
+      .where('article.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('user.user_id = :userId', { userId });
 
-    return articles.map((article) => ArticleInfoDto.toDto(article));
+    const [articles, totalCnt] = await queryBuilder
+      .orderBy('article.createDate', 'DESC')
+      .skip((page - 1) * size)
+      .take(size)
+      .getManyAndCount();
+
+    return {
+      articles: articles.map((article) => ArticlePageDto.toDto(article)),
+      totalCnt,
+    };
   }
 
   // 게시글 수정
@@ -149,14 +183,14 @@ export class ArticlesService {
 
   async filterArticles(
     query,
-  ): Promise<{ articles: ArticleInfoDto[]; totalCnt: number }> {
+  ): Promise<{ articles: ArticlePageDto[]; totalCnt: number }> {
     const {
       region,
       ageGroup,
       smoke,
       gender,
-      page = 1, // 기본값을 1로 설정
-      size = 10, // 기본값을 10으로 설정
+      page = 1,
+      size = 10,
       isRecruiting,
     } = query;
 
@@ -185,20 +219,24 @@ export class ArticlesService {
       });
     }
 
-    // 여기서 page와 size를 숫자로 변환
-    const pageNumber = parseInt(page as string, 10) || 1; // 기본값 1
-    const pageSize = parseInt(size as string, 10) || 10; // 기본값 10
+    const pageNumber = parseInt(page as string, 10) || 1;
+    const pageSize = parseInt(size as string, 10) || 10;
 
-    const [articles, totalCnt] = await queryBuilder
-      .orderBy('article.createdAt', 'DESC') // 최신순 정렬
-      .skip((pageNumber - 1) * pageSize) // 페이지네이션 처리를 위해 skip
-      .take(pageSize) // 한 페이지에 보여줄 게시글 수
-      .getManyAndCount();
+    try {
+      const [articles, totalCnt] = await queryBuilder
+        .orderBy('article.createDate', 'DESC') // 최신순 정렬
+        .skip((pageNumber - 1) * pageSize)
+        .take(pageSize)
+        .getManyAndCount();
 
-    return {
-      articles: articles.map((article) => ArticleInfoDto.toDto(article)),
-      totalCnt,
-    };
+      return {
+        articles: articles.map((article) => ArticlePageDto.toDto(article)), // ArticlePageDto 사용
+        totalCnt,
+      };
+    } catch (error) {
+      console.error('Error fetching filtered articles:', error);
+      throw error;
+    }
   }
 
   // 게시글 삭제

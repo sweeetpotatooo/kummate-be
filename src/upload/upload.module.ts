@@ -1,4 +1,4 @@
-// aws.module.ts
+// upload.module.ts
 import { Module } from '@nestjs/common';
 import { AwsService } from './upload.service';
 import { ConfigModule } from '@nestjs/config';
