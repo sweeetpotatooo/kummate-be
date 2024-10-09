@@ -26,27 +26,34 @@ export class FavoritesService {
 
   // 즐겨찾기 추가
   async addFavorite(
-    userId: number,
+    user_id: number,
     createFavoriteDto: CreateFavoriteDto,
   ): Promise<Favorite> {
+    console.log(
+      `Adding favorite for user_id: ${user_id} and article_id: ${createFavoriteDto.article_id}`,
+    );
+
     const user = await this.userRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: user_id },
     });
     if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
 
     const article = await this.articleRepository.findOne({
-      where: { article_id: createFavoriteDto.articleId },
+      where: { article_id: createFavoriteDto.article_id },
     });
     if (!article) throw new NotFoundException('게시글을 찾을 수 없습니다.');
 
-    // 이미 즐겨찾기한 경우 예외 처리
-    const existingFavorite = await this.favoriteRepository.findOne({
-      where: {
-        user: { user_id: userId },
-        article: { article_id: createFavoriteDto.articleId },
-      },
-    });
+    // 이미 즐겨찾기한 경우 예외 처리 using QueryBuilder
+    const existingFavorite = await this.favoriteRepository
+      .createQueryBuilder('favorite')
+      .where('favorite.user_id = :user_id', { user_id })
+      .andWhere('favorite.article_id = :article_id', {
+        article_id: createFavoriteDto.article_id,
+      })
+      .getOne();
+
     if (existingFavorite) {
+      console.log('Favorite already exists');
       throw new ConflictException('이미 즐겨찾기한 게시글입니다.');
     }
 
@@ -54,36 +61,63 @@ export class FavoritesService {
     return this.favoriteRepository.save(favorite);
   }
 
-  // 즐겨찾기 제거
+  // 즐겨찾기 제거 using QueryBuilder
   async removeFavorite(
-    userId: number,
+    user_id: number,
     removeFavoriteDto: RemoveFavoriteDto,
   ): Promise<void> {
-    const favorite = await this.favoriteRepository.findOne({
-      where: {
-        user: { user_id: userId },
-        article: { article_id: removeFavoriteDto.articleId },
-      },
-    });
-    if (!favorite)
+    console.log(
+      `Removing favorite for user_id: ${user_id} and article_id: ${removeFavoriteDto.article_id}`,
+    );
+
+    const favorite = await this.favoriteRepository
+      .createQueryBuilder('favorite')
+      .where('favorite.user_id = :user_id', { user_id })
+      .andWhere('favorite.article_id = :article_id', {
+        article_id: removeFavoriteDto.article_id,
+      })
+      .getOne();
+
+    if (!favorite) {
+      console.log('Favorite not found');
       throw new NotFoundException('즐겨찾기 항목을 찾을 수 없습니다.');
+    }
 
     await this.favoriteRepository.remove(favorite);
   }
 
   // 사용자의 즐겨찾기 목록 조회
   async getFavorites(
-    userId: number,
+    user_id: number,
     page: number = 1,
     size: number = 10,
   ): Promise<Favorite[]> {
+    console.log(
+      `Fetching favorites for user_id: ${user_id}, page: ${page}, size: ${size}`,
+    );
+
     const favorites = await this.favoriteRepository.find({
-      where: { user: { user_id: userId } }, // 'id'를 'user_id'로 변경
+      where: { user: { user_id: user_id } },
       relations: ['article'],
       skip: (page - 1) * size,
       take: size,
-      order: { createdAt: 'DESC' },
+      order: { created_at: 'DESC' },
     });
     return favorites;
+  }
+
+  // 특정 게시글의 찜 상태 확인 using QueryBuilder
+  async isFavorited(user_id: number, article_id: number): Promise<boolean> {
+    console.log(
+      `Checking if user_id: ${user_id} has favorited article_id: ${article_id}`,
+    );
+
+    const favorite = await this.favoriteRepository
+      .createQueryBuilder('favorite')
+      .where('favorite.user_id = :user_id', { user_id })
+      .andWhere('favorite.article_id = :article_id', { article_id })
+      .getOne();
+    console.log(`Favorite found: ${favorite ? 'Yes' : 'No'}`);
+    return !!favorite;
   }
 }

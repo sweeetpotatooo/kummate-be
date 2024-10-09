@@ -31,8 +31,8 @@ export class ApplyListResultDto {
         articleUserName: apply.article.user.nickname,
         approveStatus: apply.approveStatus,
         isRead: isApplicant ? apply.isApplicantRead : apply.isArticleUserRead,
-        createdAt: apply.created_at,
-        updatedAt: apply.updated_at,
+        createdAt: apply.createDate, // 수정된 필드
+        updatedAt: apply.lastModifiedDate, // 수정된 필드
         isToMe: isApplicant, // 현재 사용자가 신청자인 경우 true
         otherUserId: otherUserId, // 상대방 사용자 ID
         otherUserName: otherUserName, // 상대방 사용자 이름

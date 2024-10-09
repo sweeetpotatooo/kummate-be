@@ -87,11 +87,12 @@ export class SignService {
     return new LogOutResultDto(expiredToken);
   }
 
-  // 액세스 토큰 생성 메소드
+  // SignService의 getAccessToken 메서드 수정
   private getAccessToken(user: User): string {
     return this.jwtService.sign(
       {
-        id: user.user_id,
+        sub: user.user_id, // 'sub' 필드로 변경
+        username: user.email, // 추가: 사용자 식별을 위한 username 포함
         roles: user.user_roles,
       },
       {

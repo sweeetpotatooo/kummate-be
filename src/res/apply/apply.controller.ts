@@ -8,6 +8,7 @@ import {
   Param,
   Query,
   UseGuards,
+  Post,
 } from '@nestjs/common';
 import { ApplyService } from './apply.service';
 import { ApproveUserForm } from './dto/approve-user.form';
@@ -16,14 +17,25 @@ import { RefuseUserResultDto } from './dto/refuse-user-result.dto';
 import { ApplyDeleteResultDto } from './dto/apply-delete-result.dto';
 import { ApplyListResultDto } from './dto/apply-list-result.dto';
 import { ApplyDeleteNoticeResultDto } from './dto/apply-delete-notice-result.dto.ts';
-import { AuthGuard } from '@nestjs/passport';
 import { User as GetUser } from '../../auth/user.decorator';
 import { User } from '../user/entities/user.entity';
+import { CreateApplyResultDto } from './dto/create-apply-result.dto';
+import { CreateApplyDto } from './dto/create-apply.dto';
+import { JwtAccessTokenGuard } from 'src/auth/guard/accessToken.guard';
 
 @Controller('api/applicant')
-@UseGuards(AuthGuard())
+@UseGuards(JwtAccessTokenGuard)
 export class ApplyController {
   constructor(private readonly applyService: ApplyService) {}
+
+  @Post('/')
+  async createApply(
+    @GetUser() user: User,
+    @Body() createApplyDto: CreateApplyDto,
+  ): Promise<CreateApplyResultDto> {
+    const result = await this.applyService.createApply(user, createApplyDto);
+    return result;
+  }
 
   @Patch('/approve')
   async patchApprove(

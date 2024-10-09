@@ -35,7 +35,7 @@ export class AuthController {
   // 프로필 정보 확인 (JWT가 필요한 요청)
   @UseGuards(JwtAccessTokenGuard)
   @Get('profile')
-  async getProfile(@Req() req: Request) {
+  async getProfile(@Req() req) {
     return req.user;
   }
 
@@ -48,7 +48,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async logout(@Req() req: CustomRequest): Promise<LogOutResultDto> {
     console.log('User info from token:', req.user); // 로그로 확인
-    const userId = req.user.id;
+    const userId = req.user.user_id; // 올바른 참조
     const result = await this.signService.logout(userId);
     console.log(`result: ${result}`);
     return result;

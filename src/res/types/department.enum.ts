@@ -2,7 +2,7 @@ export enum Department {
   Business = '경영학과',
   Economics = '경제통상학과',
   Police = '경찰학과',
-  Fire = '소방 방제학과',
+  Fire = '소방방제학과',
   Library = '문헌정보학과',
   Child = '유아교육과',
   Social = '사회복지학과',

@@ -53,14 +53,6 @@ export class MyArticleDto {
   @IsNotEmpty()
   region: string;
 
-  @IsString()
-  @IsNotEmpty()
-  period: string;
-
-  @IsInt()
-  @IsOptional()
-  price?: number;
-
   @IsBoolean()
   @IsNotEmpty()
   isRecruiting: boolean;
@@ -77,8 +69,6 @@ export class MyArticleDto {
     dto.createdDate = article.createDate;
     dto.modifiedDate = article.lastModifiedDate;
     dto.region = article.region.value;
-    dto.period = article.period.value;
-    dto.price = article.price;
     dto.isRecruiting = article.isRecruiting;
     return dto;
   }

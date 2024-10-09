@@ -26,6 +26,14 @@ export class MyInfoDto {
   @IsOptional()
   image?: string;
 
+  @IsInt()
+  @IsOptional()
+  student_id?: number;
+
+  @IsString()
+  @IsOptional()
+  department?: string;
+
   @IsBoolean()
   @IsOptional()
   isSmoker?: boolean;
@@ -74,6 +82,8 @@ export class MyInfoDto {
     dto.tags = user.tag || [];
     dto.age = user.age;
     dto.detail = user.detail;
+    dto.student_id = user.student_id;
+    dto.department = user.department;
     return dto;
   }
 }

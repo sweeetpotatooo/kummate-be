@@ -17,6 +17,14 @@ export class PatchMyInfoResultDto {
   @IsOptional()
   age?: number;
 
+  @IsInt()
+  @IsOptional()
+  student_id?: number;
+
+  @IsString()
+  @IsOptional()
+  department?: string;
+
   @IsBoolean()
   @IsOptional()
   isSmoke?: boolean;
@@ -57,6 +65,8 @@ export class PatchMyInfoResultDto {
     dto.activityTime = user.activityTime ? user.activityTime : null;
     dto.tags = user.tags ? Array.from(user.tags) : [];
     dto.detail = user.detail;
+    dto.department = user.department;
+    dto.student_id = user.student_id;
     return dto;
   }
 }

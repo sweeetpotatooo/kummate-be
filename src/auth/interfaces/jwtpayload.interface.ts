@@ -1,15 +1,8 @@
 // src/types/custom-request.interface.ts
 import { Request } from 'express';
+import { User } from 'src/res/user/entities/user.entity'; // User 엔티티 임포트
 
-// JWT 토큰에서 가져온 페이로드 타입 정의
-export interface JwtPayload {
-  id: number;
-  username: string;
-  token: string;
-  // 필요한 다른 필드도 여기에 추가 가능
-}
-
-// Request 객체 확장 (req.user에 JwtPayload가 포함되도록)
+// Request 객체 확장 (req.user에 User 객체가 포함되도록)
 export interface CustomRequest extends Request {
-  user: JwtPayload;
+  user: User;
 }

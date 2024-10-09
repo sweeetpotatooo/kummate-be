@@ -78,7 +78,7 @@ export class MyContentController {
     const pageSize = parseInt(size, 10) || 10;
 
     const result = await this.articlesService.getUserArticles(
-      user.id, // 수정된 부분
+      user.user_id, // 'user_id'로 변경
       pageNumber,
       pageSize,
     );
@@ -158,7 +158,7 @@ export class MyContentController {
 
       // 사용자 프로필 이미지 업데이트
       await this.myContentService.updateProfileImage(
-        userPayload.id,
+        userPayload.user_id,
         uploadResult.imageUrl,
       );
 

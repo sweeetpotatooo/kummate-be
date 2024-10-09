@@ -10,6 +10,7 @@ import { MycontentsModule } from './res/mycontents/mycontents.module';
 import { AwsModule } from './upload/upload.module';
 import { ArticlesModule } from './res/article/article.module';
 import { FavoritesModule } from './res/favorite/favorites.module';
+import { ApplyModule } from './res/apply/apply.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { FavoritesModule } from './res/favorite/favorites.module';
     TypeOrmModule.forRoot(typeOrmModuleOptions),
     AwsModule,
     FavoritesModule,
+    ApplyModule,
   ],
 })
 export class AppModule implements NestModule {

@@ -5,5 +5,5 @@ import { IsInt, IsNotEmpty } from 'class-validator';
 export class RemoveFavoriteDto {
   @IsInt()
   @IsNotEmpty()
-  articleId: number;
+  article_id: number;
 }

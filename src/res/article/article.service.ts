@@ -1,3 +1,5 @@
+// src/articles/article.service.ts
+
 import {
   Injectable,
   NotFoundException,
@@ -11,6 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { ArticlePageDto } from './dto/ArticlePageDto';
 import { UserService } from '../user/user.service';
+
 @Injectable()
 export class ArticlesService {
   constructor(
@@ -29,7 +32,7 @@ export class ArticlesService {
     ) {
       throw new BadRequestException('유효하지 않은 게시글입니다.');
     }
-    // 사용자 조회 (여기서 user 변수를 선언하고 초기화)
+    // 사용자 조회
     const user = await this.userService.findById(user_id);
     if (!user) {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');
@@ -79,9 +82,7 @@ export class ArticlesService {
 
     const { page = 1, size = 10, isRecruiting } = query;
 
-    console.log('Original isRecruiting:', isRecruiting);
     const isRecruitingBool = isRecruiting === 'true';
-    console.log('Converted isRecruiting:', isRecruitingBool);
 
     const queryBuilder = this.articleRepository
       .createQueryBuilder('article')
@@ -97,25 +98,15 @@ export class ArticlesService {
     const pageNumber = parseInt(page as string, 10) || 1;
     const pageSize = parseInt(size as string, 10) || 10;
 
-    console.log(
-      'Building query with orderBy createDate DESC, skip:',
-      (pageNumber - 1) * pageSize,
-      'take:',
-      pageSize,
-    );
-
     try {
       const [articles, totalCnt] = await queryBuilder
-        .orderBy('article.createDate', 'DESC') // 'createDate'로 수정
+        .orderBy('article.createDate', 'DESC')
         .skip((pageNumber - 1) * pageSize)
         .take(pageSize)
         .getManyAndCount();
 
-      console.log('Fetched articles:', articles);
-      console.log('Total count:', totalCnt);
-
       return {
-        articles: articles.map((article) => ArticlePageDto.toDto(article)), // ArticlePageDto 사용
+        articles: articles.map((article) => ArticlePageDto.toDto(article)),
         totalCnt,
       };
     } catch (error) {
@@ -167,6 +158,7 @@ export class ArticlesService {
       throw new BadRequestException('모집이 종료된 게시글입니다.');
     }
 
+    // 사용자 ID 비교
     if (article.user.user_id !== user.user_id) {
       throw new BadRequestException('작성자가 아닙니다.');
     }
@@ -176,11 +168,39 @@ export class ArticlesService {
     if (dto.content) article.content = dto.content;
     if (dto.region) article.region = dto.region;
     if (dto.ageGroup) article.ageGroup = dto.ageGroup;
-    if (dto.smoke) article.smoke = dto.smoke;
+    if (dto.smoke !== undefined) article.smoke = dto.smoke;
 
     await this.articleRepository.save(article);
   }
 
+  // 게시글 삭제
+  async deleteArticle(user: User, id: number): Promise<void> {
+    const article = await this.articleRepository.findOne({
+      where: { article_id: id },
+      relations: ['user'],
+    });
+
+    if (!article) {
+      throw new NotFoundException('게시글을 찾을 수 없습니다.');
+    }
+
+    if (article.isDeleted) {
+      throw new BadRequestException('이미 삭제된 게시글입니다.');
+    }
+
+    // 사용자 ID 비교
+    if (article.user.user_id !== user.user_id) {
+      throw new BadRequestException('작성자가 아닙니다.');
+    }
+
+    article.isDeleted = true;
+
+    // 지원자 처리 로직 추가 필요 시 여기에 구현
+
+    await this.articleRepository.save(article);
+  }
+
+  // 게시글 필터링
   async filterArticles(
     query,
   ): Promise<{ articles: ArticlePageDto[]; totalCnt: number }> {
@@ -199,18 +219,18 @@ export class ArticlesService {
       .leftJoinAndSelect('article.user', 'user')
       .where('article.isDeleted = :isDeleted', { isDeleted: false });
 
-    if (region) {
+    if (region && region !== '상관 없음') {
       queryBuilder.andWhere('article.region = :region', { region });
     }
-    if (ageGroup) {
+    if (ageGroup && ageGroup !== '상관 없음') {
       queryBuilder.andWhere('article.ageGroup = :ageGroup', { ageGroup });
     }
-    if (smoke !== undefined) {
+    if (smoke !== undefined && smoke !== '') {
       queryBuilder.andWhere('article.smoke = :smoke', {
         smoke: smoke === 'true',
       });
     }
-    if (gender) {
+    if (gender && gender !== '상관 없음') {
       queryBuilder.andWhere('user.gender = :gender', { gender });
     }
     if (isRecruiting !== undefined) {
@@ -230,38 +250,12 @@ export class ArticlesService {
         .getManyAndCount();
 
       return {
-        articles: articles.map((article) => ArticlePageDto.toDto(article)), // ArticlePageDto 사용
+        articles: articles.map((article) => ArticlePageDto.toDto(article)),
         totalCnt,
       };
     } catch (error) {
       console.error('Error fetching filtered articles:', error);
       throw error;
     }
-  }
-
-  // 게시글 삭제
-  async deleteArticle(user: User, id: number): Promise<void> {
-    const article = await this.articleRepository.findOne({
-      where: { article_id: id },
-      relations: ['user'],
-    });
-
-    if (!article) {
-      throw new NotFoundException('게시글을 찾을 수 없습니다.');
-    }
-
-    if (article.isDeleted) {
-      throw new BadRequestException('이미 삭제된 게시글입니다.');
-    }
-
-    if (article.user.user_id !== user.user_id) {
-      throw new BadRequestException('작성자가 아닙니다.');
-    }
-
-    article.isDeleted = true;
-
-    // 지원자 처리 로직 추가 필요 시 여기에 구현
-
-    await this.articleRepository.save(article);
   }
 }

@@ -11,11 +11,13 @@ import { RefuseUserResultDto } from './dto/refuse-user-result.dto';
 import { ApplyDeleteResultDto } from './dto/apply-delete-result.dto';
 import { ApplyListResultDto } from './dto/apply-list-result.dto';
 import { ApplyDeleteNoticeResultDto } from './dto/apply-delete-notice-result.dto.ts';
+import { CreateApplyDto } from './dto/create-apply.dto';
+import { CreateApplyResultDto } from './dto/create-apply-result.dto';
 import { User } from '../user/entities/user.entity';
 import { Apply } from './entities/apply.entity';
 import { Article } from '../article/entities/article.entity';
 import { ApproveStatus } from '../types/ApproveStatus.enum';
-import { Repository, Brackets } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
@@ -30,6 +32,52 @@ export class ApplyService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
+
+  async createApply(
+    user: User,
+    createApplyDto: CreateApplyDto,
+  ): Promise<CreateApplyResultDto> {
+    const { articleId } = createApplyDto;
+
+    // 해당 게시글이 존재하는지 확인
+    const article = await this.articleRepository.findOne({
+      where: { article_id: articleId },
+    });
+    if (!article) {
+      throw new NotFoundException('게시글을 찾을 수 없습니다.');
+    }
+
+    // 이미 신청했는지 확인
+    const existingApply = await this.applyRepository.findOne({
+      where: {
+        applicantUser: { user_id: user.user_id },
+        article: { article_id: articleId },
+      },
+    });
+    if (existingApply) {
+      throw new BadRequestException('이미 신청한 게시글입니다.');
+    }
+
+    // 새로운 신청 생성
+    const newApply = this.applyRepository.create({
+      applicantUser: user,
+      article: article,
+      approveStatus: ApproveStatus.WAIT, // 초기 상태 설정
+      isApplicantDelete: false,
+      isArticleUserDelete: false,
+      isApplicantRead: false,
+      isArticleUserRead: false,
+    });
+
+    await this.applyRepository.save(newApply);
+
+    return {
+      applyId: newApply.apply_id,
+      userId: user.user_id,
+      articleId: article.article_id,
+      createdAt: newApply.createDate,
+    };
+  }
 
   async patchApprove(
     user: User,
@@ -162,42 +210,57 @@ export class ApplyService {
     page: number,
     size: number,
   ): Promise<ApplyListResultDto> {
-    page = page >= 1 ? page - 1 : 0;
+    try {
+      page = page >= 1 ? page - 1 : 0;
 
-    const queryBuilder = this.applyRepository
-      .createQueryBuilder('apply')
-      .leftJoinAndSelect('apply.article', 'article')
-      .leftJoinAndSelect('article.user', 'articleUser')
-      .leftJoinAndSelect('apply.applicantUser', 'applicantUser')
-      .where(
-        new Brackets((qb) => {
-          qb.where('apply.applicantUser = :userId', { userId: user.user_id })
-            .andWhere('apply.isApplicantDelete = :isDelete', {
-              isDelete: false,
+      console.log(
+        `Fetching notices for user_id: ${user.user_id}, page: ${page}, size: ${size}`,
+      );
+
+      const queryBuilder = this.applyRepository
+        .createQueryBuilder('apply')
+        .leftJoinAndSelect('apply.article', 'article')
+        .leftJoinAndSelect('article.user', 'articleUser')
+        .leftJoinAndSelect('apply.applicantUser', 'applicantUser')
+        .where(
+          new Brackets((qb) => {
+            qb.where('apply.applicantUser.user_id = :userId', {
+              userId: user.user_id,
             })
-            .andWhere('apply.isApplicantRead = :isRead', { isRead: false });
-        }),
-      )
-      .orWhere(
-        new Brackets((qb) => {
-          qb.where('articleUser.user_id = :userId', { userId: user.user_id })
-            .andWhere('apply.isArticleUserDelete = :isDelete', {
-              isDelete: false,
-            })
-            .andWhere('apply.isArticleUserRead = :isRead', { isRead: false });
-        }),
-      )
-      .orderBy('apply.updated_at', 'DESC') // updated_at 필드 사용
-      .skip(page * size)
-      .take(size);
+              .andWhere('apply.isApplicantDelete = :isDelete', {
+                isDelete: false,
+              })
+              .andWhere('apply.isApplicantRead = :isRead', { isRead: false });
+          }),
+        )
+        .orWhere(
+          new Brackets((qb) => {
+            qb.where('articleUser.user_id = :userId', { userId: user.user_id })
+              .andWhere('apply.isArticleUserDelete = :isDelete', {
+                isDelete: false,
+              })
+              .andWhere('apply.isArticleUserRead = :isRead', { isRead: false });
+          }),
+        )
+        .orderBy('apply.modified_date_time', 'DESC') // 수정된 필드
+        .skip(page * size)
+        .take(size);
 
-    const [applyList, totalCount] = await queryBuilder.getManyAndCount();
+      const [applyList, totalCount] = await queryBuilder.getManyAndCount();
 
-    return ApplyListResultDto.toMixApplicantDtoList(
-      applyList,
-      totalCount,
-      user.user_id,
-    );
+      console.log(
+        `Fetched ${applyList.length} applies, totalCount: ${totalCount}`,
+      );
+
+      return ApplyListResultDto.toMixApplicantDtoList(
+        applyList,
+        totalCount,
+        user.user_id,
+      );
+    } catch (error) {
+      console.error('Error in getNotices:', error);
+      throw error;
+    }
   }
 
   async deleteNotice(
@@ -227,7 +290,31 @@ export class ApplyService {
       applyId: apply.apply_id,
     };
   }
+  async getMyApplications(
+    user: User,
+    page: number,
+    size: number,
+  ): Promise<ApplyListResultDto> {
+    page = page >= 1 ? page - 1 : 0;
 
+    const queryBuilder = this.applyRepository
+      .createQueryBuilder('apply')
+      .leftJoinAndSelect('apply.article', 'article')
+      .leftJoinAndSelect('apply.applicantUser', 'applicantUser')
+      .where('apply.applicantUser = :userId', { userId: user.user_id })
+      .andWhere('apply.isApplicantDelete = :isDelete', { isDelete: false })
+      .orderBy('apply.updated_at', 'DESC')
+      .skip(page * size)
+      .take(size);
+
+    const [applyList, totalCount] = await queryBuilder.getManyAndCount();
+
+    return ApplyListResultDto.toMixApplicantDtoList(
+      applyList,
+      totalCount,
+      user.user_id,
+    );
+  }
   private validPatchRefuse(apply: Apply, article: Article) {
     this.validRecruitingArticle(article);
 

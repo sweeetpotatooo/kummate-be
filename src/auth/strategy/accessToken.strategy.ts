@@ -1,37 +1,56 @@
-//src/auth/strategy/accessToken.strategy.ts
-import { Injectable } from '@nestjs/common';
+// src/auth/strategy/accessToken.strategy.ts
+
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AccessTokenPayload } from '../auth.type';
-import { AuthGuard } from '@nestjs/passport';
-
-@Injectable()
-export class JwtAuthGuard extends AuthGuard('access_token') {}
-
+import { UserService } from 'src/res/user/user.service';
+import { User } from 'src/res/user/entities/user.entity';
 @Injectable()
 export class JwtAccessTokenStrategy extends PassportStrategy(
   Strategy,
   'access_token',
 ) {
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly userService: UserService, // UserService 주입
+  ) {
     super({
-      // request의 쿠키에서 refresh token을 가져옴
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-
       secretOrKey: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
-      // 만료된 토큰은 거부
       ignoreExpiration: false,
-      // validate 함수에 첫번째 인자에 request를 넘겨줌
       passReqToCallback: true,
     });
   }
 
-  validate(req: Request, payload: AccessTokenPayload) {
-    // request에 저장을 해놔야 Guard후에 controller 메서드에서 사용 가능
-    console.log('Access Token Payload:', payload); // payload 로그 출력
-    req.user = payload;
-    return payload;
+  async validate(req: Request, payload: AccessTokenPayload): Promise<User> {
+    console.log('Access Token Payload:', payload); // 페이로드 로그 출력
+
+    // payload.sub가 사용자 ID (user_id)라고 가정
+    const user = await this.userService.findById(payload.sub);
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    // 토큰 무효화 확인
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      throw new UnauthorizedException('인증 헤더가 없습니다.');
+    }
+
+    const token = authHeader.split(' ')[1];
+    if (user.accessToken !== token) {
+      throw new UnauthorizedException('토큰이 무효화되었습니다.');
+    }
+
+    console.log('Validated User:', user); // 검증된 사용자 로그 출력
+    req.user = user; // User 엔티티 할당
+    return user;
   }
 }

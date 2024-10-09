@@ -4,6 +4,8 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  UpdateDateColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { ApproveStatus } from '../../types/ApproveStatus.enum'; // Enum 타입
 import { User } from '../../user/entities/user.entity'; // User 엔티티
@@ -17,6 +19,7 @@ export class Apply {
   @Column({
     type: 'enum',
     enum: ApproveStatus,
+    default: ApproveStatus.WAIT,
   })
   approveStatus: ApproveStatus;
 
@@ -39,4 +42,10 @@ export class Apply {
   @ManyToOne(() => Article, (article) => article.applies, { eager: true })
   @JoinColumn({ name: 'article_id' })
   article: Article;
+
+  @CreateDateColumn({ name: 'create_date_time' })
+  createDate: Date;
+
+  @UpdateDateColumn({ name: 'modified_date_time' })
+  lastModifiedDate: Date;
 }

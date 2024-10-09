@@ -10,6 +10,7 @@ import { Gender } from 'src/res/types/gender.enum';
 import { ActivityTime } from 'src/res/types/activitytime.enum';
 import { ageGroup } from 'src/res/types/ageGroup.enum';
 import { Dorm } from 'src/res/types/dorm.enum';
+import { Department } from 'src/res/types/department.enum';
 
 export class PatchMyInfoRequestDto {
   @IsEnum(Gender)
@@ -19,6 +20,14 @@ export class PatchMyInfoRequestDto {
   @IsInt()
   @IsOptional()
   age?: number;
+
+  @IsInt()
+  @IsOptional()
+  student_id?: number;
+
+  @IsEnum(Department)
+  @IsOptional()
+  department?: Department;
 
   @IsBoolean()
   @IsOptional()

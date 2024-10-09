@@ -22,6 +22,7 @@ import { ageGroup } from '../types/ageGroup.enum';
 import { AwsService } from '../../upload/upload.service'; // AWS 서비스 import
 import { UUIDService } from '../uuid/uuid.service'; // UUID 생성 등을 위한 유틸 서비스 import
 import { Express } from 'express'; // Express 모듈 import
+import { Department } from '../types/department.enum';
 @Injectable()
 export class MyContentService {
   constructor(
@@ -54,7 +55,7 @@ export class MyContentService {
   // 사용자 정보 불러오기
   async getMyInfo(userPayload: any): Promise<MyInfoDto> {
     const user = await this.userRepository.findOne({
-      where: { user_id: userPayload.id }, // 올바른 참조
+      where: { user_id: userPayload.user_id }, // 올바른 참조
     });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -70,7 +71,7 @@ export class MyContentService {
   ): Promise<PatchMyNicknameResult> {
     // userPayload에서 id를 추출하여 사용자 조회
     const user = await this.userRepository.findOne({
-      where: { user_id: userPayload.id },
+      where: { user_id: userPayload.user_id },
     });
 
     if (!user) {
@@ -108,7 +109,7 @@ export class MyContentService {
   ): Promise<PatchMyInfoResultDto> {
     try {
       let user = await this.userRepository.findOne({
-        where: { user_id: userPayload.id }, // 올바른 참조
+        where: { user_id: userPayload.user_id }, // 올바른 참조
       });
 
       if (!user) {
@@ -221,6 +222,26 @@ export class MyContentService {
           '유효하지 않은 기숙사 값입니다.',
           HttpStatus.BAD_REQUEST,
         );
+      }
+
+      const mapDepartment = (department: string): Department | undefined => {
+        if (Object.values(Department).includes(department as Department)) {
+          return department as Department;
+        } else {
+          throw new HttpException(
+            '유효하지 않은 학과 값입니다.',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+      };
+
+      if (form.department) {
+        const mappedDepartment = mapDepartment(form.department);
+        user.department = mappedDepartment;
+      }
+
+      if (form.student_id !== undefined) {
+        user.student_id = form.student_id;
       }
 
       const mapAgeGroup = (ageGroupStr: string): ageGroup | undefined => {

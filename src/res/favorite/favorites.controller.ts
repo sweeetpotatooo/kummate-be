@@ -9,17 +9,17 @@ import {
   Query,
   UseGuards,
   Request,
+  Param,
 } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
 import { RemoveFavoriteDto } from './dto/remove-favorite.dto';
-import { AuthGuard } from '@nestjs/passport'; // JWT 인증 가드 사용 시
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { User } from '../user/entities/user.entity';
+import { JwtAccessTokenGuard } from '../../auth/guard/accessToken.guard';
 
 @ApiTags('Favorites 즐겨찾기 API')
 @ApiBearerAuth()
-@UseGuards(AuthGuard('jwt')) // JWT 인증 가드 적용
+@UseGuards(JwtAccessTokenGuard)
 @Controller('api/favorites')
 export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
@@ -33,9 +33,10 @@ export class FavoritesController {
     @Body() createFavoriteDto: CreateFavoriteDto,
     @Request() req: any,
   ) {
-    const user: User = req.user;
+    const user = req.user;
+    const user_id = user.user_id;
     const favorite = await this.favoritesService.addFavorite(
-      user.user_id,
+      user_id,
       createFavoriteDto,
     );
     return {
@@ -52,10 +53,11 @@ export class FavoritesController {
   @Delete()
   async removeFavorite(
     @Body() removeFavoriteDto: RemoveFavoriteDto,
-    @Request() req: any, // Request 데코레이터 사용
+    @Request() req: any,
   ) {
-    const user: User = req.user; // req.user에서 사용자 정보 가져오기
-    await this.favoritesService.removeFavorite(user.user_id, removeFavoriteDto); // 'id' 대신 'user_id' 사용
+    const user = req.user;
+    const user_id = user.user_id;
+    await this.favoritesService.removeFavorite(user_id, removeFavoriteDto);
     return {
       statusCode: 200,
       message: '즐겨찾기가 제거되었습니다.',
@@ -70,11 +72,12 @@ export class FavoritesController {
   async getFavorites(
     @Query('page') page: number = 1,
     @Query('size') size: number = 10,
-    @Request() req: any, // Request 데코레이터 사용
+    @Request() req: any,
   ) {
-    const user: User = req.user; // req.user에서 사용자 정보 가져오기
+    const user = req.user;
+    const user_id = user.user_id;
     const favorites = await this.favoritesService.getFavorites(
-      user.user_id, // 'id' 대신 'user_id' 사용
+      user_id,
       page,
       size,
     );
@@ -82,6 +85,28 @@ export class FavoritesController {
       statusCode: 200,
       message: '즐겨찾기 목록을 조회했습니다.',
       data: favorites,
+    };
+  }
+
+  @ApiOperation({
+    summary: '특정 게시글의 찜 상태 조회',
+    description: '로그인한 사용자가 특정 게시글을 찜했는지 여부를 조회합니다.',
+  })
+  @Get(':articleId')
+  async isFavorited(
+    @Param('articleId') articleId: number,
+    @Request() req: any,
+  ) {
+    const user = req.user;
+    const user_id = user.user_id;
+    const isFavorited = await this.favoritesService.isFavorited(
+      user_id,
+      articleId,
+    );
+    return {
+      statusCode: 200,
+      message: '찜 상태를 조회했습니다.',
+      data: isFavorited,
     };
   }
 }

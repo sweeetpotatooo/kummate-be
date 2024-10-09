@@ -16,6 +16,14 @@ export class PatchMyInfoForm {
   @IsOptional()
   age?: number;
 
+  @IsInt()
+  @IsOptional()
+  student_id?: number;
+
+  @IsString()
+  @IsOptional()
+  department?: string;
+
   @IsBoolean()
   @IsNotEmpty()
   isSmoke: boolean;
@@ -66,6 +74,8 @@ export class PatchMyInfoForm {
     dto.detail = form.myText;
     dto.ageGroup = form.ageGroup;
     dto.profileImage = form.profileImage; // 추가
+    dto.student_id = form.student_id;
+    dto.department = form.department;
     return dto;
   }
 }
@@ -78,6 +88,14 @@ export class PatchMyInfoRequestDto {
   @IsInt()
   @IsOptional()
   age?: number;
+
+  @IsInt()
+  @IsOptional()
+  student_id?: number;
+
+  @IsString()
+  @IsOptional()
+  department?: string;
 
   @IsBoolean()
   @IsOptional()
