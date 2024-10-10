@@ -221,7 +221,7 @@ export class ApplyService {
         .createQueryBuilder('apply')
         .leftJoinAndSelect('apply.article', 'article')
         .leftJoinAndSelect('article.user', 'articleUser')
-        .leftJoinAndSelect('apply.applicantUser', 'applicantUser')
+        .leftJoinAndSelect('apply.applicantUser', 'applicantUser') // 명시적으로 조인
         .where(
           new Brackets((qb) => {
             qb.where('apply.applicantUser.user_id = :userId', {
@@ -242,7 +242,7 @@ export class ApplyService {
               .andWhere('apply.isArticleUserRead = :isRead', { isRead: false });
           }),
         )
-        .orderBy('apply.modified_date_time', 'DESC') // 수정된 필드
+        .orderBy('apply.lastModifiedDate', 'DESC') // 수정된 필드명
         .skip(page * size)
         .take(size);
 
@@ -290,7 +290,8 @@ export class ApplyService {
       applyId: apply.apply_id,
     };
   }
-  async getMyApplications(
+
+  async getReceivedApplications(
     user: User,
     page: number,
     size: number,
@@ -300,10 +301,11 @@ export class ApplyService {
     const queryBuilder = this.applyRepository
       .createQueryBuilder('apply')
       .leftJoinAndSelect('apply.article', 'article')
+      .leftJoinAndSelect('article.user', 'articleUser')
       .leftJoinAndSelect('apply.applicantUser', 'applicantUser')
-      .where('apply.applicantUser = :userId', { userId: user.user_id })
-      .andWhere('apply.isApplicantDelete = :isDelete', { isDelete: false })
-      .orderBy('apply.updated_at', 'DESC')
+      .where('articleUser.user_id = :userId', { userId: user.user_id })
+      .andWhere('apply.isArticleUserDelete = :isDelete', { isDelete: false })
+      .orderBy('apply.lastModifiedDate', 'DESC')
       .skip(page * size)
       .take(size);
 
@@ -315,6 +317,37 @@ export class ApplyService {
       user.user_id,
     );
   }
+
+  async getMyApplications(
+    user: User,
+    page: number,
+    size: number,
+  ): Promise<ApplyListResultDto> {
+    page = page >= 1 ? page - 1 : 0;
+
+    const queryBuilder = this.applyRepository
+      .createQueryBuilder('apply')
+      .leftJoinAndSelect('apply.article', 'article')
+      .leftJoinAndSelect('article.user', 'articleUser') // 이 라인을 추가하세요
+      .leftJoinAndSelect('apply.applicantUser', 'applicantUser')
+      .where('applicantUser.user_id = :userId', { userId: user.user_id })
+      .andWhere('apply.isApplicantDelete = :isDelete', { isDelete: false })
+      .orderBy('apply.lastModifiedDate', 'DESC')
+      .skip(page * size)
+      .take(size);
+
+    const [applyList, totalCount] = await queryBuilder.getManyAndCount();
+
+    console.log('Apply List:', applyList);
+    console.log('Total Count:', totalCount);
+
+    return ApplyListResultDto.toMixApplicantDtoList(
+      applyList,
+      totalCount,
+      user.user_id,
+    );
+  }
+
   private validPatchRefuse(apply: Apply, article: Article) {
     this.validRecruitingArticle(article);
 

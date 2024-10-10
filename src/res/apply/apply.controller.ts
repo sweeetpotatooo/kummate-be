@@ -63,6 +63,29 @@ export class ApplyController {
     const result = await this.applyService.deleteApply(user, applyId);
     return result;
   }
+  @Get('/myApplications')
+  async getMyApplications(
+    @GetUser() user: User,
+    @Query('page') page: number,
+    @Query('size') size: number,
+  ): Promise<ApplyListResultDto> {
+    const result = await this.applyService.getMyApplications(user, page, size);
+    return result;
+  }
+
+  @Get('/receivedApplications')
+  async getReceivedApplications(
+    @GetUser() user: User,
+    @Query('page') page: number,
+    @Query('size') size: number,
+  ): Promise<ApplyListResultDto> {
+    const result = await this.applyService.getReceivedApplications(
+      user,
+      page,
+      size,
+    );
+    return result;
+  }
 
   @Get('/notices')
   async getNotices(

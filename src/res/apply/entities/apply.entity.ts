@@ -35,11 +35,11 @@ export class Apply {
   @Column({ default: false })
   isArticleUserRead: boolean;
 
-  @ManyToOne(() => User, (user) => user.applies, { eager: true })
+  @ManyToOne(() => User, (user) => user.applies)
   @JoinColumn({ name: 'applicant_user_id' })
   applicantUser: User;
 
-  @ManyToOne(() => Article, (article) => article.applies, { eager: true })
+  @ManyToOne(() => Article, (article) => article.applies)
   @JoinColumn({ name: 'article_id' })
   article: Article;
 

@@ -79,7 +79,7 @@ export class MyInfoDto {
     dto.region = user.region || null;
     dto.ageGroup = user.ageGroup || null;
     dto.mbti = user.mbti || null;
-    dto.tags = user.tag || [];
+    dto.tags = user.tags || [];
     dto.age = user.age;
     dto.detail = user.detail;
     dto.student_id = user.student_id;
