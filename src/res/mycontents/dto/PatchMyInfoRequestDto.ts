@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { Gender } from 'src/res/types/gender.enum';
 import { ActivityTime } from 'src/res/types/activitytime.enum';
-import { ageGroup } from 'src/res/types/ageGroup.enum';
+import { AgeGroup } from 'src/res/types/ageGroup.enum';
 import { Dorm } from 'src/res/types/dorm.enum';
 import { Department } from 'src/res/types/department.enum';
 
@@ -41,9 +41,9 @@ export class PatchMyInfoRequestDto {
   @IsOptional()
   activityTime?: ActivityTime;
 
-  @IsEnum(ageGroup)
+  @IsEnum(AgeGroup)
   @IsOptional()
-  ageGroup?: ageGroup;
+  ageGroup?: AgeGroup;
 
   @IsArray()
   @IsString({ each: true })

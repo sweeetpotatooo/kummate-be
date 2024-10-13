@@ -1,3 +1,4 @@
+//src/res/types/ApproveStatus.enum.ts
 /**
  * 승인 상태(ApproveStatus)에 대한 enum 정의
  * 각 값은 한국어 문자열로 매핑됨

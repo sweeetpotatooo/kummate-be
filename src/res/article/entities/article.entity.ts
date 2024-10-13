@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Gender } from '../../types/gender.enum';
-import { ageGroup } from '../../types/ageGroup.enum';
+import { AgeGroup } from '../../types/ageGroup.enum';
 import { Dorm } from '../../types/dorm.enum';
 import { BaseEntity } from 'src/res/entities/Base.entity';
 import { Apply } from 'src/res/apply/entities/apply.entity';
@@ -38,9 +38,9 @@ export class Article extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: ageGroup,
+    enum: AgeGroup,
   })
-  ageGroup: ageGroup;
+  ageGroup: AgeGroup;
 
   @Column({
     type: 'enum',

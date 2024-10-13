@@ -4,15 +4,25 @@ import {
   Controller,
   Get,
   Put,
-  Delete, // Delete 메서드 추가
+  Delete,
   Param,
   HttpException,
   HttpStatus,
   BadRequestException,
+  NotFoundException,
+  Req,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAccessTokenGuard } from 'src/auth/guard/accessToken.guard';
+import { User } from './entities/user.entity';
+
+interface RequestWithUser extends Request {
+  user: User;
+}
 
 @Controller('user')
 export class UserController {
@@ -88,5 +98,20 @@ export class UserController {
   async deleteUser(@Param('id') id: number) {
     await this.userService.deleteUser(id);
     return { message: 'User deleted successfully' };
+  }
+
+  @Get('profile/:id')
+  async getUserProfile(@Param('id') id: number) {
+    const user = await this.userService.findUserById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return { data: user };
+  }
+  @UseGuards(JwtAccessTokenGuard)
+  @Get('similar')
+  async getSimilarUsers(@Req() req: RequestWithUser): Promise<User[]> {
+    const currentUser = req.user as User; // 현재 로그인한 유저 정보 가져오기
+    return this.userService.findSimilarUsers(currentUser);
   }
 }

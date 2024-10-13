@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsEnum, IsBoolean } from 'class-validator';
-import { ageGroup } from 'src/res/types/ageGroup.enum';
+import { AgeGroup } from 'src/res/types/ageGroup.enum';
 import { Dorm } from 'src/res/types/dorm.enum';
 export class ArticleRegisterDto {
   @ApiProperty({ description: '제목', example: '같이 방쓸 컴공 선배님 구해요' })
@@ -12,8 +12,8 @@ export class ArticleRegisterDto {
   region: Dorm;
 
   @ApiProperty({ description: '나이대', example: '20 ~ 22' })
-  @IsEnum(ageGroup)
-  ageGroup: ageGroup;
+  @IsEnum(AgeGroup)
+  ageGroup: AgeGroup;
 
   @ApiProperty({ description: '흡연여부', example: '안해요' })
   @IsBoolean()
@@ -29,7 +29,7 @@ export class ArticleRegisterDto {
   constructor(
     title: string,
     region: Dorm,
-    ageGroup: ageGroup,
+    ageGroup: AgeGroup,
     smoke: boolean,
     content: string,
   ) {

@@ -18,7 +18,7 @@ import { Gender } from '../types/gender.enum';
 import { Mbti } from '../types/mbti.enum';
 import { ActivityTime } from '../types/activitytime.enum';
 import { Dorm } from '../types/dorm.enum';
-import { ageGroup } from '../types/ageGroup.enum';
+import { AgeGroup } from '../types/ageGroup.enum';
 import { AwsService } from '../../upload/upload.service'; // AWS 서비스 import
 import { UUIDService } from '../uuid/uuid.service'; // UUID 생성 등을 위한 유틸 서비스 import
 import { Express } from 'express'; // Express 모듈 import
@@ -244,14 +244,14 @@ export class MyContentService {
         user.student_id = form.student_id;
       }
 
-      const mapAgeGroup = (ageGroupStr: string): ageGroup | undefined => {
+      const mapAgeGroup = (ageGroupStr: string): AgeGroup | undefined => {
         switch (ageGroupStr) {
           case '20 ~ 22':
-            return ageGroup.age1;
+            return AgeGroup.age1;
           case '23 ~ 25':
-            return ageGroup.age2;
+            return AgeGroup.age2;
           case '26 ~ ':
-            return ageGroup.age3;
+            return AgeGroup.age3;
           default:
             return undefined;
         }

@@ -10,7 +10,7 @@ import { Gender } from '../../types/gender.enum';
 import { ActivityTime } from '../../types/activitytime.enum';
 import { Dorm } from '../../types/dorm.enum';
 import { Mbti } from '../../types/mbti.enum';
-import { ageGroup } from 'src/res/types/ageGroup.enum';
+import { AgeGroup } from 'src/res/types/ageGroup.enum';
 
 export class ProfileDto {
   @IsString()
@@ -68,7 +68,7 @@ export class ProfileDto {
     dto.activityTime = user.activityTime
       ? ActivityTime[user.activityTime]
       : null;
-    dto.ageGroup = user.ageGroup ? ageGroup[user.ageGroup] : null;
+    dto.ageGroup = user.ageGroup ? AgeGroup[user.ageGroup] : null;
     dto.gender = user.gender ? Gender[user.gender] : null;
     dto.region = user.region ? Dorm[user.region] : null;
     dto.mbti = user.mbti ? Mbti[user.mbti] : null;

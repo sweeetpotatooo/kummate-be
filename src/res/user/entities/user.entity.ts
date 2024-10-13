@@ -16,7 +16,7 @@ import { Mbti } from 'src/res/types/mbti.enum';
 import { Department } from 'src/res/types/department.enum';
 import { BaseEntity } from 'src/res/entities/Base.entity';
 import { Article } from 'src/res/article/entities/article.entity';
-import { ageGroup } from 'src/res/types/ageGroup.enum';
+import { AgeGroup } from 'src/res/types/ageGroup.enum';
 import { Apply } from 'src/res/apply/entities/apply.entity';
 import { Favorite } from 'src/res/favorite/entities/favorite.entity';
 
@@ -79,8 +79,8 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   detail?: string;
 
-  @Column({ type: 'enum', enum: ageGroup })
-  ageGroup?: ageGroup;
+  @Column({ type: 'enum', enum: AgeGroup })
+  ageGroup?: AgeGroup;
 
   @OneToMany(() => Article, (article) => article.user)
   articles: Article[]; // 여러 개의 Article을 가질 수 있음

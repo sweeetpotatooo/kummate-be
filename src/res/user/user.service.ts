@@ -10,12 +10,15 @@ import { UpdateUserDto } from './dto/update-user.dto'; // 유저 업데이트 �
 import { CreateUserDto } from './dto/create-user.dto'; // 유저 생성 시 사용되는 데이터 전송 객체
 import * as bcrypt from 'bcrypt'; // 비밀번호 암호화를 위한 bcrypt 라이브러리
 import axios from 'axios'; // HTTP 요청을 위한 Axios 라이브러리
+import { MbtiCompatibilityService } from '../mbti/mbti-compatibility.service';
+import { AgeGroup } from '../types/ageGroup.enum';
 
 @Injectable() // 이 클래스가 서비스로 사용될 수 있도록 선언하는 데코레이터
 export class UserService {
   constructor(
     @InjectRepository(User) // TypeORM의 유저 레포지토리를 주입받음
     private readonly usersRepository: Repository<User>, // 유저와 관련된 데이터베이스 작업을 처리하는 레포지토리
+    private readonly mbtiCompatibilityService: MbtiCompatibilityService,
   ) {}
 
   // 이메일로 인증번호를 전송하는 메서드
@@ -96,30 +99,46 @@ export class UserService {
 
   // 이메일 인증 상태를 확인하는 메서드
   async checkEmailVerified(email: string): Promise<boolean> {
-    console.log('Checking if email is verified:', email); // 로그: 이메일 인증 상태 확인 시작
+    console.log('Checking if email is verified:', email);
     const response = await axios.post('https://univcert.com/api/v1/status', {
-      email, // 이메일을 전달하여 인증 상태 요청
+      email,
     });
-    console.log('Email verification status response:', response.data); // 로그: 인증 상태 결과 출력
-    return response.data.verified; // 이메일 인증 여부 반환
+    console.log('Email verification status response:', response.data);
+    return response.data.success;
   }
 
   // 새로운 유저를 생성하는 메서드
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const { password, ...rest } = createUserDto; // DTO에서 비밀번호와 나머지 데이터를 분리
-    console.log('Creating user with data:', rest); // 로그: 유저 생성 데이터 출력
-    const hashedPassword = await bcrypt.hash(password, 10); // 비밀번호를 해시 처리 (암호화)
-    console.log('Hashed password:', hashedPassword); // 로그: 해시된 비밀번호 출력
+    const { email, password, nickname, ...rest } = createUserDto;
+    console.log('Creating user with data:', rest);
+
+    // 이메일 인증 여부 확인
+    const isVerified = await this.checkEmailVerified(email);
+    if (!isVerified) {
+      throw new BadRequestException('이메일 인증이 완료되지 않았습니다.');
+    }
+
+    // 이메일 또는 닉네임 중복 확인
+    const existingUser = await this.usersRepository.findOne({
+      where: [{ email }, { nickname }],
+    });
+    if (existingUser) {
+      throw new BadRequestException('이메일 또는 닉네임이 이미 사용 중입니다.');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('Hashed password:', hashedPassword);
 
     const user = this.usersRepository.create({
-      ...rest, // 나머지 데이터
-      password: hashedPassword, // 해시된 비밀번호를 유저 객체에 할당
+      email,
+      password: hashedPassword,
+      nickname,
+      ...rest,
     });
 
-    console.log('Saving user:', user); // 로그: 유저 저장 시작
-    return this.usersRepository.save(user); // 유저를 데이터베이스에 저장
+    console.log('Saving user:', user);
+    return this.usersRepository.save(user);
   }
-
   // 유저 정보를 업데이트하는 메서드
   async updateUser(
     email: string, // 업데이트하려는 유저의 이메일
@@ -191,5 +210,77 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
     return user; // 유저 반환
+  }
+
+  private isAgeInGroup(ageGroup: AgeGroup, age: number): boolean {
+    switch (ageGroup) {
+      case AgeGroup.age1: // '20 ~ 22'
+        return age >= 20 && age <= 22;
+      case AgeGroup.age2: // '23 ~ 25'
+        return age >= 23 && age <= 25;
+      case AgeGroup.age3: // '26 ~ '
+        return age >= 26;
+      default:
+        return false;
+    }
+  }
+
+  async findSimilarUsers(currentUser: User): Promise<User[]> {
+    const queryBuilder = this.usersRepository.createQueryBuilder('user');
+
+    queryBuilder
+      .where('user.user_id != :currentUserId', {
+        currentUserId: currentUser.user_id,
+      })
+      .andWhere('user.gender = :gender', { gender: currentUser.gender })
+      .andWhere('user.isSmoker = :isSmoker', { isSmoker: currentUser.isSmoker })
+      .andWhere('user.region = :region', { region: currentUser.region });
+
+    const filteredUsers = await queryBuilder.getMany();
+
+    // 각 유저에 대한 점수 계산
+    const scoredUsers = filteredUsers.map((user) => {
+      let score = 0;
+
+      // 태그 점수 계산 (10점씩)
+      if (currentUser.tags && user.tags) {
+        const commonTags = currentUser.tags.filter((tag) =>
+          user.tags.includes(tag),
+        );
+        score += commonTags.length * 10;
+      }
+
+      // 활동 시간 점수 계산 (15점)
+      if (currentUser.activityTime === user.activityTime) {
+        score += 15;
+      }
+
+      // 선호 나이대와 상대방의 실제 나이를 비교하여 점수 계산 (10점)
+      if (this.isAgeInGroup(currentUser.ageGroup, user.age)) {
+        score += 10;
+      }
+
+      // 학과 점수 계산 (20점)
+      if (currentUser.department === user.department) {
+        score += 20;
+      }
+
+      // MBTI 궁합 점수 계산
+      const mbtiScore = this.mbtiCompatibilityService.calculateCompatibility(
+        currentUser.mbti,
+        user.mbti,
+      );
+      score += mbtiScore;
+
+      return { user, score };
+    });
+
+    // 점수 순으로 정렬 후 상위 10명 선택
+    const topUsers = scoredUsers
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10)
+      .map((entry) => entry.user);
+
+    return topUsers;
   }
 }
