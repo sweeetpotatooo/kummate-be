@@ -98,7 +98,7 @@ export class FavoritesService {
 
     const favorites = await this.favoriteRepository.find({
       where: { user: { user_id: user_id } },
-      relations: ['article'],
+      relations: ['article', 'article.user'],
       skip: (page - 1) * size,
       take: size,
       order: { created_at: 'DESC' },

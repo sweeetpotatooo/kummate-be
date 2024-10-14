@@ -7,6 +7,10 @@ export class ArticlePageDto {
   @IsNumber()
   id: number;
 
+  @ApiProperty({ description: 'User_ID' })
+  @IsNumber()
+  userId: number; // userId 프로퍼티
+
   @ApiProperty({ description: '제목' })
   @IsString()
   title: string;
@@ -33,7 +37,7 @@ export class ArticlePageDto {
 
   @ApiProperty({ description: '생성일자' })
   @IsString()
-  createDate: string; // Date를 string으로 변환
+  createDate: string;
 
   @ApiProperty({ description: '기숙사' })
   @IsString()
@@ -53,6 +57,7 @@ export class ArticlePageDto {
 
   constructor(
     id: number,
+    userId: number, // 생성자에 userId 추가
     title: string,
     email: string,
     image: string,
@@ -66,6 +71,7 @@ export class ArticlePageDto {
     isRecruiting: boolean,
   ) {
     this.id = id;
+    this.userId = userId; // 할당
     this.title = title;
     this.email = email;
     this.image = image;
@@ -82,13 +88,14 @@ export class ArticlePageDto {
   static toDto(article: Article): ArticlePageDto {
     return new ArticlePageDto(
       article.article_id,
+      article.user.user_id, // userId 전달
       article.title,
       article.user.email,
       article.user.image,
       article.user.nickname,
       article.content,
       article.user.gender,
-      article.createDate.toISOString(), // Date를 string으로 변환
+      article.createDate.toISOString(),
       article.region,
       article.ageGroup,
       article.smoke,
