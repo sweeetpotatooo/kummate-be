@@ -1,12 +1,13 @@
-// approve-user.form.ts
-import { IsInt } from 'class-validator';
+import { IsNumber, IsNotEmpty } from 'class-validator';
 import { ApproveUserDto } from './approve-user.dto';
 
 export class ApproveUserForm {
-  @IsInt()
+  @IsNumber()
+  @IsNotEmpty()
   userId: number;
 
-  @IsInt()
+  @IsNumber()
+  @IsNotEmpty()
   articleId: number;
 
   toDto(): ApproveUserDto {

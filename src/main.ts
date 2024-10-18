@@ -1,14 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-
+import { ValidationPipe } from '@nestjs/common';
 declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // CORS 설정
   app.enableCors({
-    origin: 'http://localhost:5173', // 리액트 애플리케이션이 동작하는 주소
+    origin: 'http://34.64.123.73', // 리액트 애플리케이션이 동작하는 주소
     credentials: true,
   });
   // main.ts
@@ -22,6 +22,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
 
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
   await app.listen(3001);
 
   // Hot Reload 설정

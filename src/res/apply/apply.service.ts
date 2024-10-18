@@ -19,6 +19,7 @@ import { Article } from '../article/entities/article.entity';
 import { ApproveStatus } from '../types/ApproveStatus.enum';
 import { Brackets, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { RefuseUserDto } from './dto/refuse-user.dto';
 
 @Injectable()
 export class ApplyService {
@@ -135,7 +136,14 @@ export class ApplyService {
     };
   }
 
-  async patchRefuse(user: User, applyId: number): Promise<RefuseUserResultDto> {
+  async patchRefuse(
+    user: User,
+    { applyId, articleId }: RefuseUserDto,
+  ): Promise<RefuseUserResultDto> {
+    if (!applyId || !articleId) {
+      throw new BadRequestException('유효하지 않은 요청입니다.');
+    }
+
     if (!applyId) {
       throw new BadRequestException('유효하지 않은 게시글입니다.');
     }
@@ -147,6 +155,9 @@ export class ApplyService {
 
     if (!apply) {
       throw new NotFoundException('지원 정보를 찾을 수 없습니다.');
+    }
+    if (apply.article.article_id !== articleId) {
+      throw new BadRequestException('applyId와 articleId가 일치하지 않습니다.');
     }
 
     const article = apply.article;

@@ -22,6 +22,7 @@ import { User } from '../user/entities/user.entity';
 import { CreateApplyResultDto } from './dto/create-apply-result.dto';
 import { CreateApplyDto } from './dto/create-apply.dto';
 import { JwtAccessTokenGuard } from 'src/auth/guard/accessToken.guard';
+import { RefuseUserDto } from './dto/refuse-user.dto';
 
 @Controller('api/applicant')
 @UseGuards(JwtAccessTokenGuard)
@@ -50,11 +51,14 @@ export class ApplyController {
   async patchRefuse(
     @GetUser() user: User,
     @Param('applyId') applyId: number,
+    @Body() refuseUserDto: RefuseUserDto,
   ): Promise<RefuseUserResultDto> {
-    const result = await this.applyService.patchRefuse(user, applyId);
+    const result = await this.applyService.patchRefuse(user, {
+      applyId,
+      articleId: refuseUserDto.articleId,
+    });
     return result;
   }
-
   @Delete('/:applyId')
   async deleteApplicant(
     @GetUser() user: User,
