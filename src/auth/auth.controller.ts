@@ -12,7 +12,6 @@ import { SignService } from './auth.service';
 import { SignInRequestDto, SignUpRequestDto } from './dto/auth.dto';
 import { LogOutResultDto } from './dto/auth.dto';
 import { JwtAccessTokenGuard } from './guard/accessToken.guard';
-import { Request } from 'express';
 import { ApiOperation } from '@nestjs/swagger';
 import { CustomRequest } from './interfaces/jwtpayload.interface';
 
