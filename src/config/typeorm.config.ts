@@ -6,11 +6,11 @@ import { Apply } from 'src/res/apply/entities/apply.entity';
 import { Favorite } from 'src/res/favorite/entities/favorite.entity';
 export const typeOrmModuleOptions: TypeOrmModuleOptions = {
   type: 'mysql',
-  host: process.env.DATABASE_HOST, // 데이터베이스 호스트
+  host: '34.22.92.240', // 데이터베이스 호스트
   port: 3306, // 데이터베이스 포트
-  username: process.env.DATABASE_USERNAME,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_NAME,
+  username: 'root',
+  password: 'tpgus8028~',
+  database: 'kummate',
   entities: [User, Article, Apply, Favorite],
   synchronize: false, // 프로덕션에서는 false로 설정
   logging: true,

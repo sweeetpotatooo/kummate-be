@@ -31,7 +31,7 @@ export class AuthController {
     return this.signService.signIn(signInRequestDto);
   }
 
-  // 프로필 정보 확인 (JWT가 필요한 요청)
+  // 프로필 정보 확인
   @UseGuards(JwtAccessTokenGuard)
   @Get('profile')
   async getProfile(@Req() req) {
