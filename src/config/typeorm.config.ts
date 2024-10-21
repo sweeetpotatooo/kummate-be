@@ -6,7 +6,7 @@ import { Apply } from 'src/res/apply/entities/apply.entity';
 import { Favorite } from 'src/res/favorite/entities/favorite.entity';
 export const typeOrmModuleOptions: TypeOrmModuleOptions = {
   type: 'mysql',
-  host: '127.0.0.1', // 데이터베이스 호스트
+  host: '34.22.92.240', // 데이터베이스 호스트
   port: 3306, // 데이터베이스 포트
   username: 'root',
   password: 'tpgus8028~',
