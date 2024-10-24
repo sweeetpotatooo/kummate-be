@@ -11,6 +11,7 @@ import { AwsModule } from './upload/upload.module';
 import { ArticlesModule } from './res/article/article.module';
 import { FavoritesModule } from './res/favorite/favorites.module';
 import { ApplyModule } from './res/apply/apply.module';
+import { ChatModule } from './res/chat/chat.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ApplyModule } from './res/apply/apply.module';
     AwsModule,
     FavoritesModule,
     ApplyModule,
+    ChatModule,
   ],
 })
 export class AppModule implements NestModule {

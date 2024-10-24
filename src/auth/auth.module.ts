@@ -32,6 +32,6 @@ import { User } from 'src/res/user/entities/user.entity';
     JwtAccessTokenGuard,
     JwtRefreshTokenGuard,
   ],
-  exports: [SignService], // 서비스 export
+  exports: [SignService, JwtModule], // 서비스 export
 })
 export class AuthModule {}
