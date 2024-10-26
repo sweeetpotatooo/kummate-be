@@ -5,7 +5,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  ManyToOne,
 } from 'typeorm';
+import { ChatRoom } from './chatRoom.entity';
 
 @Entity()
 export class Message {
@@ -16,11 +18,14 @@ export class Message {
   roomId: string;
 
   @Column()
-  userEmail: string;
+  userId: number;
 
   @Column()
   message: string;
 
   @CreateDateColumn()
   createDate: Date;
+
+  @ManyToOne(() => ChatRoom, (chatRoom) => chatRoom.messages)
+  chatRoom: ChatRoom;
 }

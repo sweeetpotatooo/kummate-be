@@ -61,6 +61,7 @@ export class TokenDto {
 
 export class SignInResultDto {
   token: TokenDto;
+  user_id: number;
 }
 
 export class OAuth2SignInRequestDto {

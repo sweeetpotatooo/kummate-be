@@ -67,6 +67,7 @@ export class SignService {
     // 액세스 토큰과 리프레시 토큰을 반환
     return {
       token: { atk, rtk },
+      user_id: user.user_id,
     };
   }
 
