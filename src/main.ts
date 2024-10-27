@@ -9,6 +9,7 @@ async function bootstrap() {
 
   // CORS 설정
   app.enableCors({
+    //origin: 'http://localhost:5173',
     origin: 'http://kummates.com', // 리액트 애플리케이션이 동작하는 주소
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
