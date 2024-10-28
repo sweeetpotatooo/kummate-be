@@ -6,6 +6,7 @@ import { Dorm } from 'src/res/types/dorm.enum';
 
 export class FavoriteArticleDto {
   id: number;
+  userId: number;
   title: string;
   content: string;
   nickname: string;
@@ -19,6 +20,7 @@ export class FavoriteArticleDto {
 
   constructor(article: Article) {
     this.id = article.article_id;
+    this.userId = article.user.user_id;
     this.title = article.title;
     this.content = article.content;
     this.nickname = article.user.nickname; // author 관계 추가 시 사용
