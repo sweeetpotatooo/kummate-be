@@ -32,6 +32,7 @@ async function bootstrap() {
   );
 
   // 서버 실행
+  //3001포트
   await app.listen(3001);
 
   // Hot Reload 설정 (개발 환경에서만)

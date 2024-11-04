@@ -19,7 +19,7 @@ import { ChatService } from './chat.service';
 @WebSocketGateway({
   namespace: '/chat',
   cors: {
-    origin: '*', // 필요한 경우 클라이언트 도메인으로 제한
+    origin: '*',
     methods: ['GET', 'POST'],
     credentials: true,
   },
