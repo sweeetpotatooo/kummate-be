@@ -50,7 +50,6 @@ export class MbtiCompatibilityService {
       throw new Error('Invalid MBTI type');
     }
 
-    // 두 MBTI 유형 간의 점수를 반환합니다.
     return mbtiScoreTable[idx1][idx2];
   }
 }
