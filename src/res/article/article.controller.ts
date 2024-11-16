@@ -27,9 +27,7 @@ export class ArticlesController {
   @UseGuards(JwtAccessTokenGuard)
   @Post()
   async postArticle(@Req() req, @Body() form: ArticleRegisterForm) {
-    const user = req.user; // 요청 객체에서 user 정보 추출
-
-    console.log('User:', user); // user 정보 확인용 로그
+    const user = req.user;
 
     await this.articlesService.postArticle(
       user.user_id,
