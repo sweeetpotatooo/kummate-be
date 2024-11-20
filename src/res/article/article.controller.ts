@@ -48,8 +48,6 @@ export class ArticlesController {
     summary: '모든 게시물 가져오기',
     description: '모든 게시물을 가져옵니다.',
   })
-
-  // src/articles/article.controller.ts
   @Get()
   async getAllArticles(@Query() query) {
     const result = await this.articlesService.getAllArticles(query);
