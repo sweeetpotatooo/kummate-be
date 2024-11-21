@@ -79,7 +79,6 @@ export class ArticlesController {
     description: 'id에 해당하는 게시물의 내용을 수정합니다.',
   })
   @UseGuards(JwtAccessTokenGuard)
-  // src/articles/article.controller.ts
   @Put(':id')
   @UseGuards(JwtAccessTokenGuard)
   async putArticle(
@@ -87,7 +86,7 @@ export class ArticlesController {
     @Param('id', ParseIntPipe) id: number,
     @Body() form: ArticleEditForm,
   ) {
-    const user = req.user as User; // 타입 단언
+    const user = req.user as User;
     await this.articlesService.putArticle(
       user,
       id,
