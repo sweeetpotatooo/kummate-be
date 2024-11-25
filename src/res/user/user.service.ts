@@ -8,7 +8,7 @@ import { Repository } from 'typeorm'; // TypeORM에서 제공하는 레포지토
 import { User } from './entities/user.entity'; // 유저 엔티티 (데이터베이스의 테이블 구조를 정의한 클래스)
 import { UpdateUserDto } from './dto/update-user.dto'; // 유저 업데이트 시 사용되는 데이터 전송 객체
 import { CreateUserDto } from './dto/create-user.dto'; // 유저 생성 시 사용되는 데이터 전송 객체
-import * as bcrypt from 'bcrypt'; // 비밀번호 암호화를 위한 bcrypt 라이브러리
+import * as bcrypt from 'bcryptjs'; // 비밀번호 암호화를 위한 bcrypt 라이브러리
 import axios from 'axios'; // HTTP 요청을 위한 Axios 라이브러리
 import { MbtiCompatibilityService } from '../mbti/mbti-compatibility.service';
 import { AgeGroup } from '../types/ageGroup.enum';
