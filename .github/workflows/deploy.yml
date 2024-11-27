@@ -10,39 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 코드 체크아웃
-      - name: Checkout Code
+      - name: 코드 체크아웃
         uses: actions/checkout@v3
 
-      # 2. Docker 로그인
-      - name: Docker Login
+      - name: Docker 로그인
         uses: docker/login-action@v2
         with:
           registry: docker.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # 3. Docker 이미지 빌드
-      - name: Build Docker Image
+      - name: Docker 이미지 빌드
         run: |
           docker build -t sweeetpotatooo/kummate-backend:${{ github.sha }} .
 
-      # 4. Docker 이미지 푸시
-      - name: Push Docker Image
+      - name: Docker 이미지 푸시
         run: |
           docker push sweeetpotatooo/kummate-backend:${{ github.sha }}
 
-      # 5. 최신 태그 추가 및 푸시
-      - name: Add and Push Latest Tag
+      - name: 최신 이미지에 태그 추가
         run: |
           docker tag sweeetpotatooo/kummate-backend:${{ github.sha }} sweeetpotatooo/kummate-backend:latest
           docker push sweeetpotatooo/kummate-backend:latest
-
-      # 6. Cloud Run 배포 
-      - name: Deploy to Cloud Run
-        uses: google-github-actions/deploy-cloudrun@v2
-        with:
-          service: kummate-backend
-          image: docker.io/sweeetpotatooo/kummate-backend:latest
-          region: asia-northeast3
-          credentials: ${{ secrets.GCP_SA_KEY }}
