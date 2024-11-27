@@ -22,13 +22,13 @@ jobs:
 
       - name: Docker 이미지 빌드
         run: |
-          docker build -t username/backend:${{ github.sha }} .
+          docker build -t username/kummate-backend:${{ github.sha }} .
 
       - name: Docker 이미지 푸시
         run: |
-          docker push username/backend:${{ github.sha }}
+          docker push username/kummate-backend:${{ github.sha }}
 
       - name: 최신 이미지에 태그 추가
         run: |
-          docker tag username/backend:${{ github.sha }} username/backend:latest
-          docker push username/backend:latest
+          docker tag username/kummate-backend:${{ github.sha }} username/kummate-backend:latest
+          docker push username/kummate-backend:latest
