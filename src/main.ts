@@ -9,7 +9,6 @@ async function bootstrap() {
 
   // CORS 설정
   app.enableCors({
-    //origin: 'http://localhost:5173',
     origin: 'http://kummates.com', // 리액트 애플리케이션이 동작하는 주소
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
@@ -31,9 +30,10 @@ async function bootstrap() {
     }),
   );
 
-  // 서버 실행
-  //3001포트
-  await app.listen(3001);
+  // 동적 포트 설정
+  const port = process.env.PORT || 3001; // 기본값: 3001
+  await app.listen(port);
+  console.log(`Application is running on: http://localhost:${port}`);
 
   // Hot Reload 설정 (개발 환경에서만)
   if (module.hot) {
