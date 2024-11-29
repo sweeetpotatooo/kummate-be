@@ -13,7 +13,11 @@ RUN npm install
 # Copy all source files
 COPY . .
 
-# Expose port and start the application
-EXPOSE 3001
-CMD ["npm", "run", "start:prod"]
+# **Add build step**
+RUN npm run build
 
+# Expose port 8080
+EXPOSE 8080
+
+# Start the application
+CMD ["npm", "run", "start:prod"]

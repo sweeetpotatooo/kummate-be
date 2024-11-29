@@ -31,9 +31,9 @@ async function bootstrap() {
   );
 
   // 동적 포트 설정
-  const port = process.env.PORT || 3001; // 기본값: 3001
+  const port = process.env.PORT || 8080; // 기본값: 3001
   await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}`);
+  console.log(`Server is running on port ${port}`);
 
   // Hot Reload 설정 (개발 환경에서만)
   if (module.hot) {
