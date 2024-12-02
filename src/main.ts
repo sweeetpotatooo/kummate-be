@@ -31,7 +31,7 @@ async function bootstrap() {
   );
 
   // 동적 포트 설정
-  const port = process.env.PORT || 3001; // 기본값: 3001
+  const port = process.env.PORT || 3001;
   await app.listen(port);
   console.log(`Server is running on port ${port}`);
 

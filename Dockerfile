@@ -20,14 +20,13 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --only=production
 
-# 빌드 결과물 복사
+# 빌드 결과물 및 필요한 파일 복사
 COPY --from=builder /app/dist ./dist
-
-# 필요한 경우 추가 파일 복사 (예: 설정 파일)
-# COPY --from=builder /app/config ./config
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
 
 # 포트 설정
 EXPOSE 8080
 
 # 애플리케이션 시작
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main.js"]
