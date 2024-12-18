@@ -16,7 +16,6 @@ export class LoggerMiddleware implements NestMiddleware {
       );
     });
 
-    // 다음 미들웨어 또는 컨트롤러로 넘어감
     next();
   }
 }
