@@ -17,7 +17,7 @@ import { ChatModule } from './res/chat/chat.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env', // .env 파일에서 환경 변수 로드
+      envFilePath: '.env',
     }),
     UserModule,
     AuthModule,
