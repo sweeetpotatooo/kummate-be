@@ -1,4 +1,3 @@
-// src/app.module.ts
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { UserModule } from './res/user/user.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
