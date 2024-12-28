@@ -7,9 +7,9 @@ import {
   UpdateDateColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { ApproveStatus } from '../../types/ApproveStatus.enum'; // Enum 타입
-import { User } from '../../user/entities/user.entity'; // User 엔티티
-import { Article } from '../../article/entities/article.entity'; // Article 엔티티
+import { ApproveStatus } from '../../types/ApproveStatus.enum';
+import { User } from '../../user/entities/user.entity';
+import { Article } from '../../article/entities/article.entity';
 
 @Entity()
 export class Apply {
