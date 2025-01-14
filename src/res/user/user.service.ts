@@ -226,23 +226,29 @@ export class UserService {
   }
 
   async findSimilarUsers(currentUser: User): Promise<User[]> {
+    // 쿼리 빌더를 사용하여 User 엔티티를 조회합니다.
     const queryBuilder = this.usersRepository.createQueryBuilder('user');
 
+    // 현재 사용자와 동일한 사용자(user_id)를 제외합니다.
     queryBuilder
       .where('user.user_id != :currentUserId', {
         currentUserId: currentUser.user_id,
       })
+      // 성별이 같은 사용자를 필터링합니다.
       .andWhere('user.gender = :gender', { gender: currentUser.gender })
+      // 흡연 여부가 같은 사용자를 필터링합니다.
       .andWhere('user.isSmoker = :isSmoker', { isSmoker: currentUser.isSmoker })
+      // 지역이 같은 사용자를 필터링합니다.
       .andWhere('user.region = :region', { region: currentUser.region });
 
+    // 필터링된 사용자 목록을 가져옵니다.
     const filteredUsers = await queryBuilder.getMany();
 
-    // 각 유저에 대한 점수 계산
+    // 각 사용자에 대해 점수를 계산합니다.
     const scoredUsers = filteredUsers.map((user) => {
       let score = 0;
 
-      // 태그 점수 계산 (10점씩)
+      // 태그 점수 계산: 공통 태그 하나당 10점씩 부여
       if (currentUser.tags && user.tags) {
         const commonTags = currentUser.tags.filter((tag) =>
           user.tags.includes(tag),
@@ -250,37 +256,38 @@ export class UserService {
         score += commonTags.length * 10;
       }
 
-      // 활동 시간 점수 계산 (15점)
+      // 활동 시간이 같은 경우 15점 부여
       if (currentUser.activityTime === user.activityTime) {
         score += 15;
       }
 
-      // 선호 나이대와 상대방의 실제 나이를 비교하여 점수 계산 (10점)
+      // 선호 나이대에 상대방의 나이가 포함될 경우 10점 부여
       if (this.isAgeInGroup(currentUser.ageGroup, user.age)) {
         score += 10;
       }
 
-      // 학과 점수 계산 (20점)
+      // 학과가 같은 경우 20점 부여
       if (currentUser.department === user.department) {
         score += 20;
       }
 
-      // MBTI 궁합 점수 계산
+      // MBTI 궁합 점수 계산 및 추가
       const mbtiScore = this.mbtiCompatibilityService.calculateCompatibility(
         currentUser.mbti,
         user.mbti,
       );
       score += mbtiScore;
 
+      // 사용자와 계산된 점수를 반환
       return { user, score };
     });
 
-    // 점수 순으로 정렬 후 상위 10명 선택
+    // 점수를 기준으로 내림차순 정렬 후 상위 10명을 선택
     const topUsers = scoredUsers
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10)
-      .map((entry) => entry.user);
+      .sort((a, b) => b.score - a.score) // 점수 내림차순 정렬
+      .slice(0, 10) // 상위 10명 추출
+      .map((entry) => entry.user); // 사용자 정보만 반환
 
-    return topUsers;
+    return topUsers; // 상위 10명 반환
   }
 }
